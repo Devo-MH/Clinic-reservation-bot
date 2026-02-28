@@ -1,0 +1,20 @@
+node_modules/
+dist/
+.env
+.env.local
+*.env
+
+# Build outputs
+apps/web/dist/
+apps/api/dist/
+
+# Claude local settings
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

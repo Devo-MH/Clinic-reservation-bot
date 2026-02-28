@@ -1,0 +1,210 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── Multi-tenant root ────────────────────────────────────────────────────────
+
+model Tenant {
+  id              String   @id @default(cuid())
+  name            String
+  phoneNumberId   String   @unique // Meta WhatsApp phone_number_id
+  wabaId          String   // WhatsApp Business Account ID
+  accessToken     String   // Meta access token (encrypted at rest)
+  timezone        String   @default("Asia/Riyadh")
+  locale          Locale   @default(AR)
+  subscriptionTier SubscriptionTier @default(STARTER)
+  isActive        Boolean  @default(true)
+  settings        Json     @default("{}")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  doctors       Doctor[]
+  services      Service[]
+  appointments  Appointment[]
+  patients      Patient[]
+  conversations Conversation[]
+
+  @@map("tenants")
+}
+
+// ─── Doctors ──────────────────────────────────────────────────────────────────
+
+model Doctor {
+  id        String  @id @default(cuid())
+  tenantId  String
+  nameAr    String
+  nameEn    String?
+  specialty String?
+  isActive  Boolean @default(true)
+
+  tenant             Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  services           Service[]
+  schedules          Schedule[]
+  scheduleExceptions ScheduleException[]
+  appointments       Appointment[]
+
+  @@index([tenantId])
+  @@map("doctors")
+}
+
+// ─── Services ─────────────────────────────────────────────────────────────────
+
+model Service {
+  id              String  @id @default(cuid())
+  tenantId        String
+  doctorId        String?
+  nameAr          String
+  nameEn          String?
+  durationMinutes Int     @default(30)
+  price           Float?
+  isActive        Boolean @default(true)
+
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  doctor       Doctor?       @relation(fields: [doctorId], references: [id])
+  appointments Appointment[]
+
+  @@index([tenantId])
+  @@map("services")
+}
+
+// ─── Schedules ────────────────────────────────────────────────────────────────
+
+model Schedule {
+  id          String  @id @default(cuid())
+  doctorId    String
+  dayOfWeek   Int     // 0=Sunday … 6=Saturday
+  startTime   String  // "09:00"
+  endTime     String  // "17:00"
+  breakStart  String? // "13:00"
+  breakEnd    String? // "14:00"
+  isActive    Boolean @default(true)
+
+  doctor Doctor @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  @@unique([doctorId, dayOfWeek])
+  @@map("schedules")
+}
+
+model ScheduleException {
+  id          String   @id @default(cuid())
+  doctorId    String
+  date        DateTime @db.Date
+  isClosed    Boolean  @default(false)
+  customHours Json?    // { start: "10:00", end: "14:00" }
+
+  doctor Doctor @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  @@unique([doctorId, date])
+  @@map("schedule_exceptions")
+}
+
+// ─── Patients ─────────────────────────────────────────────────────────────────
+
+model Patient {
+  id                 String    @id @default(cuid())
+  tenantId           String
+  phone              String    // international format e.g. +966501234567
+  nameAr             String?
+  nameEn             String?
+  languagePreference Locale    @default(AR)
+  lastInteractionAt  DateTime?
+  createdAt          DateTime  @default(now())
+
+  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  appointments  Appointment[]
+  conversations Conversation[]
+
+  @@unique([tenantId, phone])
+  @@index([tenantId])
+  @@map("patients")
+}
+
+// ─── Appointments ─────────────────────────────────────────────────────────────
+
+model Appointment {
+  id              String            @id @default(cuid())
+  tenantId        String
+  patientId       String
+  doctorId        String
+  serviceId       String?
+  scheduledAt     DateTime
+  durationMinutes Int               @default(30)
+  status          AppointmentStatus @default(PENDING)
+  notes           String?
+  reminder24hSent Boolean           @default(false)
+  reminder2hSent  Boolean           @default(false)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient Patient @relation(fields: [patientId], references: [id])
+  doctor  Doctor  @relation(fields: [doctorId], references: [id])
+  service Service? @relation(fields: [serviceId], references: [id])
+
+  @@index([tenantId])
+  @@index([scheduledAt])
+  @@index([patientId])
+  @@map("appointments")
+}
+
+// ─── Conversations (state machine store) ──────────────────────────────────────
+
+model Conversation {
+  id        String           @id @default(cuid())
+  tenantId  String
+  patientId String?
+  phone     String           // sender's phone number
+  state     ConversationState @default(IDLE)
+  context   Json             @default("{}")  // in-progress booking data
+  expiresAt DateTime
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  tenant  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient Patient? @relation(fields: [patientId], references: [id])
+
+  @@unique([tenantId, phone])
+  @@index([tenantId])
+  @@map("conversations")
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum Locale {
+  AR
+  EN
+}
+
+enum SubscriptionTier {
+  STARTER   // 1 doctor, 100 appts/mo
+  GROWTH    // 5 doctors, 500 appts/mo
+  CLINIC    // unlimited
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  NO_SHOW
+  COMPLETED
+}
+
+enum ConversationState {
+  IDLE
+  MAIN_MENU
+  SELECTING_SERVICE
+  SELECTING_DOCTOR
+  SELECTING_DATE
+  SELECTING_TIME
+  CONFIRMING
+  CONFIRMED
+  SHOWING_APPOINTMENTS
+  CANCELLING
+  CONFIRM_CANCEL
+}
