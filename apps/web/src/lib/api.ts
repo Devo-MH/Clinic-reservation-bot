@@ -93,6 +93,12 @@ export const updateAppointmentStatus = (id: string, status: string) =>
 export const getDoctors = (tenantId: string) =>
   api.get<Doctor[]>("/doctors", { params: { tenantId } }).then((r) => r.data);
 
+export const createDoctor = (data: { tenantId: string; nameAr: string; nameEn?: string; specialty?: string }) =>
+  api.post<Doctor>("/doctors", data).then((r) => r.data);
+
+export const updateDoctor = (id: string, data: { nameAr?: string; nameEn?: string; specialty?: string; isActive?: boolean }) =>
+  api.patch<Doctor>(`/doctors/${id}`, data).then((r) => r.data);
+
 // ── Services ────────────────────────────────────────────────────────────────────
 
 export const getServices = (tenantId: string) =>
