@@ -291,17 +291,89 @@ export default function AppointmentsPage() {
         </CardContent>
       </Card>
 
-      {/* ── Table ───────────────────────────────────────────────────── */}
-      <Card className="border-0 shadow-sm overflow-hidden">
+      {/* ── Mobile card list (< md) ─────────────────────────────────── */}
+      <div className="md:hidden space-y-2">
+        {isLoading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i} className="border-0 shadow-sm">
+              <CardContent className="p-4 space-y-2">
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-3 w-2/3" />
+                <Skeleton className="h-3 w-1/3" />
+              </CardContent>
+            </Card>
+          ))
+        ) : !filtered?.length ? (
+          <div className="flex flex-col items-center py-16 text-muted-foreground">
+            <CalendarDays className="w-8 h-8 opacity-30 mb-2" />
+            <p className="text-sm">{hasFilters ? "لا توجد نتائج" : "لا توجد مواعيد بعد"}</p>
+          </div>
+        ) : (
+          filtered.map((appt) => {
+            const badge = STATUS_META[appt.status];
+            const dt = new Date(appt.scheduledAt);
+            const canAction = appt.status === "PENDING" || appt.status === "CONFIRMED";
+            return (
+              <Card key={appt.id} className="border-0 shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start gap-3 min-w-0">
+                      {/* Time pill */}
+                      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-teal-50 border border-teal-100 flex flex-col items-center justify-center">
+                        <span className="text-xs font-bold text-teal-700">{format(dt, "HH:mm")}</span>
+                        <span className="text-[9px] text-teal-500">{format(dt, "dd/MM")}</span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-sm text-foreground truncate">
+                          {appt.patient.nameAr ?? appt.patient.nameEn ?? appt.patient.phone}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{appt.patient.phone}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {appt.doctor.nameAr}
+                          {appt.service && <span> · {appt.service.nameAr}</span>}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                      <Badge variant={badge.variant} className="text-xs">{badge.label}</Badge>
+                      {canAction && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-7 w-7">
+                              <MoreVertical className="w-3.5 h-3.5" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-36">
+                            <DropdownMenuItem onClick={() => mutation.mutate({ id: appt.id, status: "COMPLETED" })} className="gap-2 text-emerald-600 focus:text-emerald-600">
+                              <CheckCircle2 className="w-3.5 h-3.5" />مكتمل
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => mutation.mutate({ id: appt.id, status: "NO_SHOW" })} className="gap-2 text-amber-600 focus:text-amber-600">
+                              <Clock className="w-3.5 h-3.5" />لم يحضر
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => mutation.mutate({ id: appt.id, status: "CANCELLED" })} className="gap-2 text-destructive focus:text-destructive">
+                              <XCircle className="w-3.5 h-3.5" />إلغاء
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })
+        )}
+      </div>
+
+      {/* ── Desktop table (>= md) ────────────────────────────────────── */}
+      <Card className="hidden md:block border-0 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/40">
                 {["المريض", "الطبيب", "الخدمة", "التاريخ والوقت", "الحالة", ""].map((h, i) => (
-                  <th
-                    key={i}
-                    className="px-3 md:px-5 py-3 md:py-3.5 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wide"
-                  >
+                  <th key={i} className="px-5 py-3.5 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                     {h}
                   </th>
                 ))}
@@ -312,9 +384,7 @@ export default function AppointmentsPage() {
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i}>
                     {Array.from({ length: 6 }).map((_, j) => (
-                      <td key={j} className="px-5 py-4">
-                        <Skeleton className="h-4 w-full max-w-[120px]" />
-                      </td>
+                      <td key={j} className="px-5 py-4"><Skeleton className="h-4 w-full max-w-[120px]" /></td>
                     ))}
                   </tr>
                 ))
@@ -334,7 +404,6 @@ export default function AppointmentsPage() {
                   const canAction = appt.status === "PENDING" || appt.status === "CONFIRMED";
                   return (
                     <tr key={appt.id} className="hover:bg-muted/30 transition-colors group">
-                      {/* Patient */}
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-2.5">
                           <div className="w-8 h-8 rounded-full bg-teal-50 flex items-center justify-center flex-shrink-0">
@@ -343,78 +412,41 @@ export default function AppointmentsPage() {
                             </span>
                           </div>
                           <div>
-                            <p className="font-medium text-foreground">
-                              {appt.patient.nameAr ?? appt.patient.nameEn ?? "—"}
-                            </p>
+                            <p className="font-medium">{appt.patient.nameAr ?? appt.patient.nameEn ?? "—"}</p>
                             <p className="text-xs text-muted-foreground">{appt.patient.phone}</p>
                           </div>
                         </div>
                       </td>
-
-                      {/* Doctor */}
                       <td className="px-5 py-4">
                         <p className="font-medium">{appt.doctor.nameAr}</p>
-                        {appt.doctor.specialty && (
-                          <p className="text-xs text-muted-foreground">{appt.doctor.specialty}</p>
-                        )}
+                        {appt.doctor.specialty && <p className="text-xs text-muted-foreground">{appt.doctor.specialty}</p>}
                       </td>
-
-                      {/* Service */}
                       <td className="px-5 py-4 text-muted-foreground">
-                        {appt.service?.nameAr ?? <span className="text-muted-foreground/50">—</span>}
+                        {appt.service?.nameAr ?? <span className="opacity-40">—</span>}
                       </td>
-
-                      {/* DateTime */}
                       <td className="px-5 py-4">
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-1.5 h-1.5 rounded-full bg-primary/60" />
-                          <div>
-                            <p className="font-medium">{format(dt, "dd MMM yyyy", { locale: ar })}</p>
-                            <p className="text-xs text-muted-foreground">{format(dt, "HH:mm")}</p>
-                          </div>
-                        </div>
+                        <p className="font-medium">{format(dt, "dd MMM yyyy", { locale: ar })}</p>
+                        <p className="text-xs text-muted-foreground">{format(dt, "HH:mm")}</p>
                       </td>
-
-                      {/* Status */}
-                      <td className="px-5 py-4">
-                        <Badge variant={badge.variant}>{badge.label}</Badge>
-                      </td>
-
-                      {/* Actions */}
+                      <td className="px-5 py-4"><Badge variant={badge.variant}>{badge.label}</Badge></td>
                       <td className="px-5 py-4">
                         {canAction && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                              >
+                              <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <MoreVertical className="w-4 h-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-40">
-                              <DropdownMenuItem
-                                onClick={() => mutation.mutate({ id: appt.id, status: "COMPLETED" })}
-                                className="gap-2 text-emerald-600 focus:text-emerald-600"
-                              >
-                                <CheckCircle2 className="w-3.5 h-3.5" />
-                                مكتمل
+                              <DropdownMenuItem onClick={() => mutation.mutate({ id: appt.id, status: "COMPLETED" })} className="gap-2 text-emerald-600 focus:text-emerald-600">
+                                <CheckCircle2 className="w-3.5 h-3.5" />مكتمل
                               </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => mutation.mutate({ id: appt.id, status: "NO_SHOW" })}
-                                className="gap-2 text-amber-600 focus:text-amber-600"
-                              >
-                                <Clock className="w-3.5 h-3.5" />
-                                لم يحضر
+                              <DropdownMenuItem onClick={() => mutation.mutate({ id: appt.id, status: "NO_SHOW" })} className="gap-2 text-amber-600 focus:text-amber-600">
+                                <Clock className="w-3.5 h-3.5" />لم يحضر
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                onClick={() => mutation.mutate({ id: appt.id, status: "CANCELLED" })}
-                                className="gap-2 text-destructive focus:text-destructive"
-                              >
-                                <XCircle className="w-3.5 h-3.5" />
-                                إلغاء
+                              <DropdownMenuItem onClick={() => mutation.mutate({ id: appt.id, status: "CANCELLED" })} className="gap-2 text-destructive focus:text-destructive">
+                                <XCircle className="w-3.5 h-3.5" />إلغاء
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
