@@ -221,7 +221,7 @@ export default function AppointmentsPage() {
   const hasFilters = search || dateFilter || statusFilter;
 
   return (
-    <div className="p-6 space-y-5 animate-fade-in">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-5 animate-fade-in">
       {/* ── Header ──────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <div>
@@ -232,16 +232,17 @@ export default function AppointmentsPage() {
         </div>
         <Button onClick={() => setCreateOpen(true)} className="gap-2">
           <Plus className="w-4 h-4" />
-          موعد جديد
+          <span className="hidden sm:inline">موعد جديد</span>
+          <span className="sm:hidden">جديد</span>
         </Button>
       </div>
 
       {/* ── Filter Bar ──────────────────────────────────────────────── */}
       <Card className="border-0 shadow-sm">
-        <CardContent className="p-4">
-          <div className="flex flex-wrap gap-3 items-center">
+        <CardContent className="p-3 md:p-4">
+          <div className="flex flex-wrap gap-2 md:gap-3 items-center">
             {/* Search */}
-            <div className="relative flex-1 min-w-[200px] max-w-xs">
+            <div className="relative w-full sm:flex-1 sm:min-w-[200px] sm:max-w-xs">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 className="pr-9"
@@ -299,7 +300,7 @@ export default function AppointmentsPage() {
                 {["المريض", "الطبيب", "الخدمة", "التاريخ والوقت", "الحالة", ""].map((h, i) => (
                   <th
                     key={i}
-                    className="px-5 py-3.5 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wide"
+                    className="px-3 md:px-5 py-3 md:py-3.5 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wide"
                   >
                     {h}
                   </th>

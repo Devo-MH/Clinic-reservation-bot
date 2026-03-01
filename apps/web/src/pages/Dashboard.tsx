@@ -85,9 +85,9 @@ export default function DashboardPage() {
   const todayLabel = format(new Date(), "EEEE، dd MMMM yyyy", { locale: ar });
 
   return (
-    <div className="p-6 space-y-6 animate-fade-in">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6 animate-fade-in">
       {/* ── Header ───────────────────────────────────────────────────── */}
-      <div className="rounded-2xl bg-gradient-to-l from-teal-700 to-teal-900 p-6 text-white shadow-lg">
+      <div className="rounded-2xl bg-gradient-to-l from-teal-700 to-teal-900 p-4 md:p-6 text-white shadow-lg">
         <div className="flex items-start justify-between">
           <div>
             <p className="text-teal-200 text-sm">{todayLabel}</p>
@@ -110,10 +110,10 @@ export default function DashboardPage() {
       </div>
 
       {/* ── KPI Cards ────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         {KPI_CARDS.map(({ key, label, icon: Icon, color, bg }) => (
           <Card key={key} className="border-0 shadow-sm hover:shadow-md transition-shadow">
-            <CardContent className="p-5">
+            <CardContent className="p-4 md:p-5">
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-muted-foreground text-xs font-medium">{label}</p>
