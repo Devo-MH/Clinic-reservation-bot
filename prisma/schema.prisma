@@ -20,6 +20,7 @@ model Tenant {
   subscriptionTier SubscriptionTier @default(STARTER)
   isActive        Boolean  @default(true)
   settings        Json     @default("{}")
+  clinicCode        String?  @unique // short memorable login code e.g. "RAYA"
   trialStartedAt    DateTime?
   ownerPhone        String?  // clinic admin WhatsApp for notifications
   dashboardPassword String?  // bcrypt hash for dashboard login

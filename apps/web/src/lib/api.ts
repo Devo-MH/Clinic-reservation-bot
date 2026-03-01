@@ -72,8 +72,8 @@ export type WeeklyData = { day: string; date: string; count: number };
 
 // ── Auth ────────────────────────────────────────────────────────────────────────
 
-export const login = (tenantId: string, password: string) =>
-  axios.post<{ token: string; tenantId: string; tenantName: string }>("/auth/login", { tenantId, password }).then((r) => r.data);
+export const login = (clinicCode: string, password: string) =>
+  axios.post<{ token: string; tenantId: string; tenantName: string }>("/auth/login", { clinicCode, password }).then((r) => r.data);
 
 // ── Appointments ────────────────────────────────────────────────────────────────
 

@@ -6,14 +6,14 @@ import { env } from "@/config/env.js";
 
 export async function authRoutes(app: FastifyInstance) {
   app.post("/auth/login", async (req, reply) => {
-    const { tenantId, password } = req.body as { tenantId: string; password: string };
+    const { clinicCode, password } = req.body as { clinicCode: string; password: string };
 
-    if (!tenantId || !password) {
-      return reply.status(400).send({ error: "tenantId and password required" });
+    if (!clinicCode || !password) {
+      return reply.status(400).send({ error: "clinicCode and password required" });
     }
 
     const tenant = await prisma.tenant.findUnique({
-      where: { id: tenantId },
+      where: { clinicCode: clinicCode.trim().toUpperCase() },
       select: { id: true, name: true, dashboardPassword: true, isActive: true },
     });
 
@@ -39,12 +39,14 @@ export async function authRoutes(app: FastifyInstance) {
     return { token, tenantId: tenant.id, tenantName: tenant.name };
   });
 
-  // Setup endpoint: set dashboard password (only if not set yet or with old password)
+  // Setup endpoint: set clinic code + dashboard password (only if not set yet)
   app.post("/auth/setup", async (req, reply) => {
-    const { tenantId, password } = req.body as { tenantId: string; password: string };
+    const { tenantId, clinicCode, password } = req.body as {
+      tenantId: string; clinicCode: string; password: string;
+    };
 
-    if (!tenantId || !password || password.length < 6) {
-      return reply.status(400).send({ error: "tenantId and password (min 6 chars) required" });
+    if (!tenantId || !clinicCode || !password || password.length < 6) {
+      return reply.status(400).send({ error: "tenantId, clinicCode, and password (min 6 chars) required" });
     }
 
     const existing = await prisma.tenant.findUnique({
@@ -54,13 +56,15 @@ export async function authRoutes(app: FastifyInstance) {
 
     if (!existing) return reply.status(404).send({ error: "Tenant not found" });
 
-    // Only allow setup if no password set yet
     if (existing.dashboardPassword) {
       return reply.status(403).send({ error: "Password already set. Contact support to reset." });
     }
 
     const hash = await bcrypt.hash(password, 10);
-    await prisma.tenant.update({ where: { id: tenantId }, data: { dashboardPassword: hash } });
+    await prisma.tenant.update({
+      where: { id: tenantId },
+      data: { dashboardPassword: hash, clinicCode: clinicCode.trim().toUpperCase() },
+    });
 
     return { ok: true };
   });

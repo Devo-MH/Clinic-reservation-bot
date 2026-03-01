@@ -4,11 +4,11 @@ import { login } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Stethoscope, Lock, Building2 } from "lucide-react";
+import { Stethoscope, Lock, Hash } from "lucide-react";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const [tenantId, setTenantId] = useState(import.meta.env.VITE_TENANT_ID ?? "");
+  const [clinicCode, setClinicCode] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,13 +18,13 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
     try {
-      const { token, tenantName } = await login(tenantId, password);
+      const { token, tenantId, tenantName } = await login(clinicCode, password);
       localStorage.setItem("clinic_token", token);
       localStorage.setItem("clinic_tenant_id", tenantId);
       localStorage.setItem("clinic_name", tenantName);
       navigate("/dashboard");
     } catch {
-      setError("بيانات الدخول غير صحيحة");
+      setError("كود العيادة أو كلمة المرور غير صحيحة");
     } finally {
       setLoading(false);
     }
@@ -52,15 +52,16 @@ export default function LoginPage() {
         <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 shadow-2xl">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label className="text-white/90">معرّف العيادة</Label>
+              <Label className="text-white/90">كود العيادة</Label>
               <div className="relative">
-                <Building2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-teal-300" />
+                <Hash className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-teal-300" />
                 <Input
-                  value={tenantId}
-                  onChange={(e) => setTenantId(e.target.value)}
-                  placeholder="أدخل معرّف العيادة"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/40 pr-10 focus-visible:ring-white/30"
+                  value={clinicCode}
+                  onChange={(e) => setClinicCode(e.target.value.toUpperCase())}
+                  placeholder="مثال: RAYA"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/40 pr-10 focus-visible:ring-white/30 font-mono tracking-widest"
                   required
+                  autoComplete="username"
                 />
               </div>
             </div>
@@ -76,6 +77,7 @@ export default function LoginPage() {
                   placeholder="••••••••"
                   className="bg-white/10 border-white/20 text-white placeholder:text-white/40 pr-10 focus-visible:ring-white/30"
                   required
+                  autoComplete="current-password"
                 />
               </div>
             </div>
