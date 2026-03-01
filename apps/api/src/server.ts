@@ -9,6 +9,7 @@ import { existsSync } from "fs";
 import { env } from "./config/env.js";
 import { webhookRoutes } from "./routes/webhook.js";
 import { apiRoutes } from "./routes/api.js";
+import { authRoutes } from "./routes/auth.js";
 import "./jobs/worker.js";
 import { startScheduler } from "./jobs/scheduler.js";
 
@@ -28,6 +29,7 @@ await app.register(rateLimit, { max: 100, timeWindow: "1 minute" });
 
 await app.register(webhookRoutes);
 await app.register(apiRoutes);
+await app.register(authRoutes);
 
 // ── Health check ──────────────────────────────────────────────────────────────
 

@@ -4,16 +4,70 @@
 
 @layer base {
   :root {
+    --background: 0 0% 98%;
+    --foreground: 172 20% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 172 20% 10%;
+
+    --border: 172 15% 88%;
+    --input: 172 15% 88%;
+    --ring: 172 66% 28%;
+
+    --primary: 172 66% 28%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 172 20% 94%;
+    --secondary-foreground: 172 40% 20%;
+
+    --muted: 172 15% 94%;
+    --muted-foreground: 172 15% 46%;
+
+    --accent: 152 69% 35%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --sidebar: 172 60% 16%;
+    --sidebar-foreground: 172 20% 92%;
+    --sidebar-active: 172 60% 22%;
+    --sidebar-border: 172 50% 22%;
+
+    --radius: 0.625rem;
+
     --font-sans: "Inter", system-ui, sans-serif;
     --font-arabic: "Tajawal", system-ui, sans-serif;
   }
 
+  * {
+    @apply border-border;
+  }
+
   body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    @apply bg-background text-foreground antialiased;
     font-family: var(--font-arabic);
   }
 
   [dir="ltr"] body {
     font-family: var(--font-sans);
+  }
+
+  /* Smooth scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-border;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
   }
 }

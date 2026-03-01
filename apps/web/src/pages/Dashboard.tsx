@@ -1,113 +1,295 @@
 import { useQuery } from "@tanstack/react-query";
-import { getAnalytics, getAppointments } from "@/lib/api";
-import { TENANT_ID, STATUS_COLORS, STATUS_LABELS } from "@/lib/utils";
+import { getAnalytics, getAppointments, getWeeklyData } from "@/lib/api";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+} from "recharts";
+import {
+  CalendarDays, CheckCircle2, XCircle, AlertTriangle,
+  TrendingUp, Clock, User,
+} from "lucide-react";
 import { format } from "date-fns";
-import { Calendar, CheckCircle, XCircle, TrendingUp } from "lucide-react";
+import { ar } from "date-fns/locale";
+
+const TENANT_ID = localStorage.getItem("clinic_tenant_id") ?? import.meta.env.VITE_TENANT_ID ?? "";
+
+const STATUS_BADGE: Record<string, { label: string; variant: "success" | "warning" | "destructive" | "secondary" | "info" }> = {
+  CONFIRMED: { label: "مؤكد", variant: "success" },
+  PENDING: { label: "قيد الانتظار", variant: "warning" },
+  CANCELLED: { label: "ملغي", variant: "destructive" },
+  NO_SHOW: { label: "لم يحضر", variant: "secondary" },
+  COMPLETED: { label: "مكتمل", variant: "info" },
+};
+
+const KPI_CARDS = [
+  {
+    key: "thisMonth" as const,
+    label: "هذا الشهر",
+    icon: CalendarDays,
+    color: "text-teal-600",
+    bg: "bg-teal-50",
+  },
+  {
+    key: "confirmed" as const,
+    label: "مؤكدة",
+    icon: CheckCircle2,
+    color: "text-emerald-600",
+    bg: "bg-emerald-50",
+  },
+  {
+    key: "cancelled" as const,
+    label: "ملغاة",
+    icon: XCircle,
+    color: "text-red-500",
+    bg: "bg-red-50",
+  },
+  {
+    key: "noShows" as const,
+    label: "لم يحضروا",
+    icon: AlertTriangle,
+    color: "text-amber-500",
+    bg: "bg-amber-50",
+  },
+];
 
 export default function DashboardPage() {
-  const { data: analytics } = useQuery({
+  const today = new Date().toISOString().split("T")[0];
+
+  const { data: analytics, isLoading: analyticsLoading } = useQuery({
     queryKey: ["analytics", TENANT_ID],
     queryFn: () => getAnalytics(TENANT_ID),
+    refetchInterval: 30_000,
   });
 
-  const { data: todayAppointments } = useQuery({
-    queryKey: ["appointments", TENANT_ID, "today"],
-    queryFn: () =>
-      getAppointments(TENANT_ID, { date: new Date().toISOString().split("T")[0] }),
+  const { data: todayAppts, isLoading: apptLoading } = useQuery({
+    queryKey: ["appointments", TENANT_ID, today],
+    queryFn: () => getAppointments(TENANT_ID, { date: today }),
+    refetchInterval: 30_000,
   });
 
-  const stats = [
-    { label: "هذا الشهر", value: analytics?.thisMonth ?? 0, icon: TrendingUp, color: "text-blue-600 bg-blue-50" },
-    { label: "مؤكدة", value: analytics?.confirmed ?? 0, icon: CheckCircle, color: "text-green-600 bg-green-50" },
-    { label: "ملغاة", value: analytics?.cancelled ?? 0, icon: XCircle, color: "text-red-600 bg-red-50" },
-    { label: "الإجمالي", value: analytics?.total ?? 0, icon: Calendar, color: "text-purple-600 bg-purple-50" },
-  ];
+  const { data: weeklyData } = useQuery({
+    queryKey: ["weekly", TENANT_ID],
+    queryFn: () => getWeeklyData(TENANT_ID),
+    refetchInterval: 60_000,
+  });
 
-  const usagePercent =
-    analytics?.limit && analytics.limit > 0
-      ? Math.min(100, Math.round((analytics.thisMonth / analytics.limit) * 100))
-      : null;
+  const usagePct = analytics?.limit
+    ? Math.min(Math.round((analytics.thisMonth / analytics.limit) * 100), 100)
+    : 0;
+
+  const progressColor =
+    usagePct >= 90 ? "bg-red-500" : usagePct >= 70 ? "bg-amber-500" : "bg-primary";
+
+  const todayLabel = format(new Date(), "EEEE، dd MMMM yyyy", { locale: ar });
 
   return (
-    <div className="p-8">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">لوحة التحكم</h2>
-
-      {/* Stats */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
-        {stats.map(({ label, value, icon: Icon, color }) => (
-          <div key={label} className="bg-white rounded-xl p-5 border border-gray-200">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm text-gray-500">{label}</span>
-              <div className={`p-2 rounded-lg ${color}`}>
-                <Icon size={18} />
-              </div>
-            </div>
-            <p className="text-3xl font-bold text-gray-900">{value}</p>
+    <div className="p-6 space-y-6 animate-fade-in">
+      {/* ── Header ───────────────────────────────────────────────────── */}
+      <div className="rounded-2xl bg-gradient-to-l from-teal-700 to-teal-900 p-6 text-white shadow-lg">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-teal-200 text-sm">{todayLabel}</p>
+            <h1 className="text-2xl font-bold mt-1">مرحباً بك 👋</h1>
+            <p className="text-teal-200/80 text-sm mt-1">
+              لديك{" "}
+              <span className="text-white font-semibold">
+                {apptLoading ? "..." : (todayAppts?.length ?? 0)}
+              </span>{" "}
+              موعد اليوم
+            </p>
           </div>
+          <div className="hidden sm:flex items-center gap-2 bg-white/10 rounded-xl px-4 py-2">
+            <TrendingUp className="w-4 h-4 text-teal-300" />
+            <span className="text-sm text-teal-100">
+              {analytics?.thisMonth ?? "—"} موعد هذا الشهر
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── KPI Cards ────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {KPI_CARDS.map(({ key, label, icon: Icon, color, bg }) => (
+          <Card key={key} className="border-0 shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-muted-foreground text-xs font-medium">{label}</p>
+                  {analyticsLoading ? (
+                    <Skeleton className="h-8 w-12 mt-2" />
+                  ) : (
+                    <p className="text-3xl font-bold text-foreground mt-1">
+                      {analytics?.[key] ?? 0}
+                    </p>
+                  )}
+                </div>
+                <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center`}>
+                  <Icon className={`w-5 h-5 ${color}`} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
-      {/* Monthly usage bar */}
-      {usagePercent !== null && analytics?.limit && (
-        <div className="bg-white rounded-xl border border-gray-200 p-5 mb-6">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-gray-700">استخدام الباقة هذا الشهر</span>
-            <span className="text-sm text-gray-500">
-              {analytics.thisMonth} / {analytics.limit} حجز
-            </span>
-          </div>
-          <div className="w-full bg-gray-100 rounded-full h-2.5">
-            <div
-              className={`h-2.5 rounded-full transition-all ${
-                usagePercent >= 90 ? "bg-red-500" : usagePercent >= 70 ? "bg-yellow-500" : "bg-green-500"
-              }`}
-              style={{ width: `${usagePercent}%` }}
-            />
-          </div>
-          {usagePercent >= 80 && (
-            <p className="text-xs text-red-500 mt-2">
-              ⚠️ اقتربت من الحد الأقصى للباقة. تواصل معنا للترقية.
-            </p>
-          )}
-        </div>
-      )}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* ── Weekly Chart ───────────────────────────────────────────── */}
+        <Card className="lg:col-span-2 border-0 shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-semibold">المواعيد - آخر 7 أيام</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {!weeklyData ? (
+              <Skeleton className="h-48 w-full rounded-lg" />
+            ) : (
+              <ResponsiveContainer width="100%" height={200}>
+                <AreaChart data={weeklyData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="tealGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#0f766e" stopOpacity={0.15} />
+                      <stop offset="95%" stopColor="#0f766e" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="day" tick={{ fontSize: 11, fill: "#6b7280" }} axisLine={false} tickLine={false} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "#6b7280" }} axisLine={false} tickLine={false} />
+                  <Tooltip
+                    contentStyle={{ borderRadius: "8px", border: "1px solid #e5e7eb", fontSize: 12 }}
+                    labelFormatter={(l) => `يوم: ${l}`}
+                    formatter={(v) => [v, "موعد"]}
+                  />
+                  <Area
+                    type="monotone" dataKey="count" stroke="#0f766e" strokeWidth={2}
+                    fill="url(#tealGrad)" dot={{ fill: "#0f766e", r: 3 }} activeDot={{ r: 5 }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
 
-      {/* Today's appointments */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <h3 className="font-semibold text-gray-900 mb-4">
-          مواعيد اليوم ({todayAppointments?.length ?? 0})
-        </h3>
-
-        {!todayAppointments?.length ? (
-          <p className="text-gray-400 text-sm">لا توجد مواعيد اليوم</p>
-        ) : (
-          <div className="space-y-3">
-            {todayAppointments.map((appt) => (
-              <div
-                key={appt.id}
-                className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0"
-              >
-                <div>
-                  <p className="font-medium text-gray-900">
-                    {appt.patient.nameAr ?? appt.patient.phone}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {appt.doctor.nameAr} · {appt.service?.nameAr}
-                  </p>
-                </div>
-                <div className="text-left flex items-center gap-3">
-                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${STATUS_COLORS[appt.status]}`}>
-                    {STATUS_LABELS[appt.status]}
-                  </span>
-                  <span className="text-sm font-medium text-gray-700">
-                    {format(new Date(appt.scheduledAt), "HH:mm")}
-                  </span>
-                </div>
+        {/* ── Usage ──────────────────────────────────────────────────── */}
+        <Card className="border-0 shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-semibold">استخدام الاشتراك</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {analyticsLoading ? (
+              <div className="space-y-3">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-2 w-full" />
+                <Skeleton className="h-4 w-2/3" />
               </div>
-            ))}
-          </div>
-        )}
+            ) : (
+              <>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">المواعيد هذا الشهر</span>
+                  <span className="font-semibold">
+                    {analytics?.thisMonth}
+                    {analytics?.limit ? ` / ${analytics.limit}` : " (∞)"}
+                  </span>
+                </div>
+                {analytics?.limit && (
+                  <>
+                    <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary">
+                      <div
+                        className={`h-full transition-all duration-500 rounded-full ${progressColor}`}
+                        style={{ width: `${usagePct}%` }}
+                      />
+                    </div>
+                    <p className={`text-xs ${usagePct >= 90 ? "text-red-500" : usagePct >= 70 ? "text-amber-500" : "text-muted-foreground"}`}>
+                      {usagePct}% من الحصة المتاحة
+                      {usagePct >= 80 && " — يُنصح بالترقية"}
+                    </p>
+                  </>
+                )}
+
+                <div className="pt-2 border-t space-y-2">
+                  {[
+                    { label: "إجمالي الكل", value: analytics?.total },
+                    { label: "ملغاة", value: analytics?.cancelled },
+                    { label: "لم يحضروا", value: analytics?.noShows },
+                  ].map(({ label, value }) => (
+                    <div key={label} className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">{label}</span>
+                      <span className="font-medium">{value}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
       </div>
+
+      {/* ── Today's Appointments ───────────────────────────────────── */}
+      <Card className="border-0 shadow-sm">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base font-semibold">مواعيد اليوم</CardTitle>
+            <Badge variant="secondary" className="text-xs">
+              {todayAppts?.length ?? 0} موعد
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {apptLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <Skeleton className="h-10 w-16 rounded-lg" />
+                  <div className="flex-1 space-y-1.5">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-3 w-24" />
+                  </div>
+                  <Skeleton className="h-6 w-16 rounded-full" />
+                </div>
+              ))}
+            </div>
+          ) : !todayAppts?.length ? (
+            <div className="flex flex-col items-center py-10 text-muted-foreground">
+              <CalendarDays className="w-10 h-10 mb-2 opacity-30" />
+              <p className="text-sm">لا توجد مواعيد اليوم</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {todayAppts.map((appt) => {
+                const badge = STATUS_BADGE[appt.status];
+                const time = format(new Date(appt.scheduledAt), "HH:mm");
+                const patientName = appt.patient.nameAr ?? appt.patient.nameEn ?? appt.patient.phone;
+                return (
+                  <div
+                    key={appt.id}
+                    className="flex items-center gap-4 p-3 rounded-xl hover:bg-muted/50 transition-colors"
+                  >
+                    {/* Time pill */}
+                    <div className="flex-shrink-0 w-14 h-11 rounded-xl bg-teal-50 flex flex-col items-center justify-center border border-teal-100">
+                      <Clock className="w-3 h-3 text-teal-600 mb-0.5" />
+                      <span className="text-xs font-bold text-teal-700">{time}</span>
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <User className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                        <p className="text-sm font-medium truncate">{patientName}</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        د. {appt.doctor.nameAr}
+                        {appt.service && ` • ${appt.service.nameAr}`}
+                      </p>
+                    </div>
+
+                    <Badge variant={badge.variant}>{badge.label}</Badge>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
