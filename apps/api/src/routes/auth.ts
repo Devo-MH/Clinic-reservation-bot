@@ -68,4 +68,33 @@ export async function authRoutes(app: FastifyInstance) {
 
     return { ok: true };
   });
+
+  // Set/update clinic code — requires current password to prove identity
+  app.post("/auth/set-code", async (req, reply) => {
+    const { tenantId, password, clinicCode } = req.body as {
+      tenantId: string; password: string; clinicCode: string;
+    };
+
+    if (!tenantId || !password || !clinicCode) {
+      return reply.status(400).send({ error: "tenantId, password, and clinicCode required" });
+    }
+
+    const tenant = await prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { dashboardPassword: true },
+    });
+
+    if (!tenant) return reply.status(404).send({ error: "Tenant not found" });
+    if (!tenant.dashboardPassword) return reply.status(400).send({ error: "No password set" });
+
+    const valid = await bcrypt.compare(password, tenant.dashboardPassword);
+    if (!valid) return reply.status(401).send({ error: "Invalid password" });
+
+    await prisma.tenant.update({
+      where: { id: tenantId },
+      data: { clinicCode: clinicCode.trim().toUpperCase() },
+    });
+
+    return { ok: true };
+  });
 }
