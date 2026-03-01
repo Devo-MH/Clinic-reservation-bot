@@ -12,6 +12,7 @@ import { handleSelectingDate } from "./states/selectingDate.js";
 import { handleSelectingTime } from "./states/selectingTime.js";
 import { handleConfirming } from "./states/confirming.js";
 import { handleCancelling } from "./states/cancelling.js";
+import { handleRescheduling } from "./states/rescheduling.js";
 
 export type BotContext = {
   tenant: Tenant;
@@ -55,7 +56,7 @@ export async function handleIncomingMessage(tenant: Tenant, message: IncomingMes
       await handleIdle(ctx, conversation, userText, patient, tenant.locale);
       break;
     case "MAIN_MENU":
-      await handleMainMenu(ctx, conversation, userText);
+      await handleMainMenu(ctx, conversation, userText, patient);
       break;
     case "SELECTING_SERVICE":
       await handleSelectingService(ctx, conversation, userText);
@@ -75,6 +76,9 @@ export async function handleIncomingMessage(tenant: Tenant, message: IncomingMes
     case "CANCELLING":
     case "CONFIRM_CANCEL":
       await handleCancelling(ctx, conversation, userText, patient);
+      break;
+    case "RESCHEDULING":
+      await handleRescheduling(ctx, conversation, userText, patient);
       break;
     default:
       await handleIdle(ctx, conversation, userText, patient, tenant.locale);

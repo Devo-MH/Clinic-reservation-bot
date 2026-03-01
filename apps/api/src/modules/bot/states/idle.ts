@@ -32,15 +32,22 @@ export async function handleIdle(
     : `Welcome to our clinic 👋`;
 
   await ctx.send({
-    type: "button",
+    type: "list",
     to: ctx.phone,
+    header: isArabic ? "🏥 القائمة الرئيسية" : "🏥 Main Menu",
     body: isArabic
       ? `${greeting}\n\nكيف يمكنني مساعدتك اليوم؟`
       : `${greeting}\n\nHow can I help you today?`,
-    buttons: [
-      { id: "book", title: isArabic ? "📅 حجز موعد" : "📅 Book Appointment" },
-      { id: "my_appointments", title: isArabic ? "📋 مواعيدي" : "📋 My Appointments" },
-      { id: "cancel", title: isArabic ? "❌ إلغاء موعد" : "❌ Cancel Appointment" },
+    buttonText: isArabic ? "اختر خياراً" : "Choose an option",
+    sections: [
+      {
+        rows: [
+          { id: "book", title: isArabic ? "📅 حجز موعد" : "📅 Book Appointment" },
+          { id: "my_appointments", title: isArabic ? "📋 مواعيدي" : "📋 My Appointments" },
+          { id: "reschedule", title: isArabic ? "✏️ تعديل موعد" : "✏️ Reschedule" },
+          { id: "cancel", title: isArabic ? "❌ إلغاء موعد" : "❌ Cancel Appointment" },
+        ],
+      },
     ],
   });
 }

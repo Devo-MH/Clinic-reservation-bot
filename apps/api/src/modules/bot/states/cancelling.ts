@@ -2,6 +2,7 @@ import type { Conversation, Patient } from "@prisma/client";
 import type { BotContext } from "../engine.js";
 import { updateConversation, resetConversation } from "../conversation.js";
 import { prisma } from "@/lib/prisma.js";
+import { cancelReminders } from "@/modules/notifications/reminders.js";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 
@@ -85,6 +86,7 @@ export async function handleCancelling(
     return;
   }
 
+  await cancelReminders(appointmentId);
   await prisma.appointment.update({
     where: { id: appointmentId },
     data: { status: "CANCELLED" },

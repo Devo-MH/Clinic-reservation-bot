@@ -2,7 +2,7 @@ import { Worker } from "bullmq";
 import { redisConnection } from "@/lib/redis.js";
 import { prisma } from "@/lib/prisma.js";
 import { sendWhatsAppMessage } from "@/modules/whatsapp/sender.js";
-import { format } from "date-fns";
+import { format, startOfDay, endOfDay, subDays } from "date-fns";
 import { ar } from "date-fns/locale";
 
 type ReminderJob = {
@@ -62,4 +62,43 @@ worker.on("failed", (job, err) => {
   console.error(`[Worker] Job ${job?.id} failed:`, err.message);
 });
 
-console.log("[Worker] Reminder worker started");
+// ── Trial expiry check worker ─────────────────────────────────────────────────
+
+const schedulerWorker = new Worker(
+  "scheduler",
+  async (job) => {
+    if (job.name !== "trial-check") return;
+
+    const twelveDaysAgo = subDays(new Date(), 12);
+    const tenants = await prisma.tenant.findMany({
+      where: {
+        trialStartedAt: {
+          gte: startOfDay(twelveDaysAgo),
+          lte: endOfDay(twelveDaysAgo),
+        },
+        ownerPhone: { not: null },
+        isActive: true,
+      },
+    });
+
+    for (const tenant of tenants) {
+      const isArabic = tenant.locale === "AR";
+      await sendWhatsAppMessage(tenant.phoneNumberId, tenant.accessToken, {
+        type: "text",
+        to: tenant.ownerPhone!,
+        body: isArabic
+          ? `⚠️ تذكير: تنتهي فترة تجربتك المجانية بعد يومين.\n\nللاستمرار في استخدام الخدمة دون انقطاع، يرجى الاشتراك قبل انتهاء المدة.\n\nتواصل معنا على هذا الرقم للاشتراك.`
+          : `⚠️ Reminder: Your free trial ends in 2 days.\n\nTo continue without interruption, please subscribe before the trial ends.\n\nReply to this message to subscribe.`,
+      });
+    }
+
+    console.log(`[Scheduler] Trial check: notified ${tenants.length} tenant(s)`);
+  },
+  { connection: redisConnection, concurrency: 1 }
+);
+
+schedulerWorker.on("failed", (job, err) => {
+  console.error(`[Scheduler] Job ${job?.id} failed:`, err.message);
+});
+
+console.log("[Worker] Reminder + scheduler workers started");

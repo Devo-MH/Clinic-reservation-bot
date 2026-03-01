@@ -2,13 +2,14 @@ import type { Conversation, Patient } from "@prisma/client";
 import type { BotContext } from "../engine.js";
 import { updateConversation, resetConversation } from "../conversation.js";
 import { prisma } from "@/lib/prisma.js";
-import { scheduleReminders } from "@/modules/notifications/reminders.js";
+import { scheduleReminders, cancelReminders } from "@/modules/notifications/reminders.js";
 import { sendDatePicker } from "./selectingDate.js";
 import { parseISO } from "date-fns";
 
 const TIER_LIMITS: Record<string, number> = {
-  STARTER: 100,
-  GROWTH: 300,
+  STARTER: 150,
+  SOLO: 500,
+  GROWTH: 1000,
   CLINIC: Infinity,
 };
 
@@ -23,56 +24,88 @@ export async function handleConfirming(
 
   switch (selection) {
     case "confirm": {
-      // Check monthly booking limit
-      const limit = TIER_LIMITS[ctx.tenant.subscriptionTier] ?? 100;
-      if (limit !== Infinity) {
-        const startOfMonth = new Date();
-        startOfMonth.setDate(1);
-        startOfMonth.setHours(0, 0, 0, 0);
+      const reschedulingId = context.reschedulingAppointmentId as string | undefined;
 
-        const thisMonthCount = await prisma.appointment.count({
-          where: {
-            tenantId: ctx.tenant.id,
-            status: { notIn: ["CANCELLED"] },
-            createdAt: { gte: startOfMonth },
+      if (reschedulingId) {
+        // ── Reschedule: update existing appointment ──────────────────────────
+        await cancelReminders(reschedulingId);
+
+        const appointment = await prisma.appointment.update({
+          where: { id: reschedulingId },
+          data: {
+            scheduledAt: parseISO(context.scheduledAt as string),
+            reminder24hSent: false,
+            reminder2hSent: false,
           },
+          include: { doctor: true },
         });
 
-        if (thisMonthCount >= limit) {
-          await resetConversation(conversation.id);
-          await ctx.send({
-            type: "text",
-            to: ctx.phone,
-            body: isArabic
-              ? "عذراً، وصلت العيادة للحد الأقصى من الحجوزات هذا الشهر. يرجى التواصل مع العيادة مباشرة."
-              : "Sorry, the clinic has reached its monthly booking limit. Please contact the clinic directly.",
+        await scheduleReminders(appointment.id, appointment.scheduledAt);
+        await resetConversation(conversation.id);
+
+        const doctorName = isArabic
+          ? appointment.doctor.nameAr
+          : (appointment.doctor.nameEn ?? appointment.doctor.nameAr);
+
+        await ctx.send({
+          type: "text",
+          to: ctx.phone,
+          body: isArabic
+            ? `✅ تم تعديل موعدك بنجاح!\n\n👨‍⚕️ الطبيب: ${doctorName}\n📅 ${appointment.scheduledAt.toLocaleString("ar-EG")}\n\nسيصلك تذكير قبل الموعد بـ 24 ساعة وساعتين. 🏥`
+            : `✅ Your appointment has been rescheduled!\n\n👨‍⚕️ Doctor: ${doctorName}\n📅 ${appointment.scheduledAt.toLocaleString()}\n\nYou'll receive reminders 24h and 2h before. 🏥`,
+        });
+      } else {
+        // ── New booking: check limit and create ──────────────────────────────
+        const limit = TIER_LIMITS[ctx.tenant.subscriptionTier] ?? 100;
+        if (limit !== Infinity) {
+          const startOfMonth = new Date();
+          startOfMonth.setDate(1);
+          startOfMonth.setHours(0, 0, 0, 0);
+
+          const thisMonthCount = await prisma.appointment.count({
+            where: {
+              tenantId: ctx.tenant.id,
+              status: { notIn: ["CANCELLED"] },
+              createdAt: { gte: startOfMonth },
+            },
           });
-          return;
+
+          if (thisMonthCount >= limit) {
+            await resetConversation(conversation.id);
+            await ctx.send({
+              type: "text",
+              to: ctx.phone,
+              body: isArabic
+                ? "عذراً، وصلت العيادة للحد الأقصى من الحجوزات هذا الشهر. يرجى التواصل مع العيادة مباشرة."
+                : "Sorry, the clinic has reached its monthly booking limit. Please contact the clinic directly.",
+            });
+            return;
+          }
         }
+
+        const appointment = await prisma.appointment.create({
+          data: {
+            tenantId: ctx.tenant.id,
+            patientId: patient.id,
+            doctorId: context.doctorId as string,
+            serviceId: (context.serviceId as string) ?? undefined,
+            scheduledAt: parseISO(context.scheduledAt as string),
+            status: "CONFIRMED",
+          },
+          include: { doctor: true, service: true },
+        });
+
+        await scheduleReminders(appointment.id, appointment.scheduledAt);
+        await resetConversation(conversation.id);
+
+        await ctx.send({
+          type: "text",
+          to: ctx.phone,
+          body: isArabic
+            ? `✅ تم تأكيد موعدك بنجاح!\n\nرقم الموعد: ${appointment.id.slice(-6).toUpperCase()}\nسيصلك تذكير قبل الموعد بـ 24 ساعة و ساعتين.\n\nشكراً لاختيارك عيادتنا 🏥`
+            : `✅ Your appointment is confirmed!\n\nRef: ${appointment.id.slice(-6).toUpperCase()}\nYou'll receive reminders 24h and 2h before your appointment.\n\nThank you for choosing our clinic 🏥`,
+        });
       }
-
-      const appointment = await prisma.appointment.create({
-        data: {
-          tenantId: ctx.tenant.id,
-          patientId: patient.id,
-          doctorId: context.doctorId as string,
-          serviceId: (context.serviceId as string) ?? undefined,
-          scheduledAt: parseISO(context.scheduledAt as string),
-          status: "CONFIRMED",
-        },
-        include: { doctor: true, service: true },
-      });
-
-      await scheduleReminders(appointment.id, appointment.scheduledAt);
-      await resetConversation(conversation.id);
-
-      await ctx.send({
-        type: "text",
-        to: ctx.phone,
-        body: isArabic
-          ? `✅ تم تأكيد موعدك بنجاح!\n\nرقم الموعد: ${appointment.id.slice(-6).toUpperCase()}\nسيصلك تذكير قبل الموعد بـ 24 ساعة و ساعتين.\n\nشكراً لاختيارك عيادتنا 🏥`
-          : `✅ Your appointment is confirmed!\n\nRef: ${appointment.id.slice(-6).toUpperCase()}\nYou'll receive reminders 24h and 2h before your appointment.\n\nThank you for choosing our clinic 🏥`,
-      });
       break;
     }
 

@@ -9,6 +9,8 @@ import { existsSync } from "fs";
 import { env } from "./config/env.js";
 import { webhookRoutes } from "./routes/webhook.js";
 import { apiRoutes } from "./routes/api.js";
+import "./jobs/worker.js";
+import { startScheduler } from "./jobs/scheduler.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -42,6 +44,8 @@ if (existsSync(webDist)) {
 }
 
 // ── Start ─────────────────────────────────────────────────────────────────────
+
+await startScheduler();
 
 try {
   await app.listen({ port: env.PORT, host: "0.0.0.0" });

@@ -20,6 +20,8 @@ model Tenant {
   subscriptionTier SubscriptionTier @default(STARTER)
   isActive        Boolean  @default(true)
   settings        Json     @default("{}")
+  trialStartedAt  DateTime?
+  ownerPhone      String?  // clinic admin WhatsApp for notifications
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -181,9 +183,10 @@ enum Locale {
 }
 
 enum SubscriptionTier {
-  STARTER   // 1 doctor, 100 appts/mo
-  GROWTH    // 5 doctors, 500 appts/mo
-  CLINIC    // unlimited
+  STARTER   // 1 doctor, 150 appts/mo  — 399 EGP / 99 SAR
+  SOLO      // 1 doctor, 500 appts/mo  — 699 EGP / 179 SAR
+  GROWTH    // 5 doctors, 1000 appts/mo — 999 EGP / 299 SAR
+  CLINIC    // unlimited               — 1999 EGP / 599 SAR
 }
 
 enum AppointmentStatus {
@@ -206,4 +209,5 @@ enum ConversationState {
   SHOWING_APPOINTMENTS
   CANCELLING
   CONFIRM_CANCEL
+  RESCHEDULING
 }

@@ -1,12 +1,14 @@
-import type { Conversation } from "@prisma/client";
+import type { Conversation, Patient } from "@prisma/client";
 import type { BotContext } from "../engine.js";
 import { updateConversation } from "../conversation.js";
 import { getServicesForTenant } from "@/modules/booking/services.js";
+import { startReschedulingFlow } from "./rescheduling.js";
 
 export async function handleMainMenu(
   ctx: BotContext,
   conversation: Conversation,
-  selection: string
+  selection: string,
+  patient: Patient
 ) {
   const isArabic = ctx.tenant.locale === "AR";
 
@@ -22,6 +24,9 @@ export async function handleMainMenu(
         body: isArabic ? "⏳ جاري تحميل مواعيدك..." : "⏳ Loading your appointments...",
       });
       break;
+    case "reschedule":
+      await startReschedulingFlow(ctx, conversation, patient, isArabic);
+      break;
     case "cancel":
       await updateConversation(conversation.id, { state: "CANCELLING" });
       await ctx.send({
@@ -33,7 +38,6 @@ export async function handleMainMenu(
       });
       break;
     default:
-      // Unknown selection — re-show menu
       await updateConversation(conversation.id, { state: "IDLE" });
       break;
   }
@@ -71,7 +75,7 @@ async function startBookingFlow(
         rows: services.map((s) => ({
           id: s.id,
           title: isArabic ? s.nameAr : (s.nameEn ?? s.nameAr),
-          description: s.price ? `${s.price} SAR` : undefined,
+          description: s.price ? `${s.price} EGP` : undefined,
         })),
       },
     ],
