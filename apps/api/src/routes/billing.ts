@@ -97,6 +97,16 @@ export async function billingRoutes(app: FastifyInstance) {
       },
     });
 
+    // Guard: ensure gateway credentials are configured
+    if (gateway === "TAP" && !env.TAP_SECRET_KEY) {
+      await prisma.payment.update({ where: { id: payment.id }, data: { status: "FAILED" } });
+      return reply.status(503).send({ error: "Payment gateway not configured. Please contact support." });
+    }
+    if (gateway === "PAYMOB" && !env.PAYMOB_API_KEY) {
+      await prisma.payment.update({ where: { id: payment.id }, data: { status: "FAILED" } });
+      return reply.status(503).send({ error: "Payment gateway not configured. Please contact support." });
+    }
+
     const callbackBase = `https://${env.RAILWAY_PUBLIC_DOMAIN ?? "localhost:3001"}`;
 
     if (gateway === "TAP") {

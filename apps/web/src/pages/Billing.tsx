@@ -12,9 +12,9 @@ import { CreditCard, Zap, CheckCircle2, Clock, AlertTriangle } from "lucide-reac
 const TENANT_ID = localStorage.getItem("clinic_tenant_id") ?? import.meta.env.VITE_TENANT_ID ?? "";
 
 const BUNDLE_META: Record<string, { label: string; icon: React.ElementType; color: string; bg: string; popular?: boolean }> = {
-  STARTER_50:  { label: "ستارتر",  icon: Zap,          color: "text-blue-600",   bg: "bg-blue-50" },
-  GROWTH_200:  { label: "نمو",     icon: CreditCard,   color: "text-teal-600",   bg: "bg-teal-50", popular: true },
-  PRO_500:     { label: "برو",     icon: CheckCircle2, color: "text-purple-600", bg: "bg-purple-50" },
+  STARTER_50:  { label: "Starter", icon: Zap,          color: "text-blue-600",   bg: "bg-blue-50" },
+  GROWTH_200:  { label: "Growth",  icon: CreditCard,   color: "text-teal-600",   bg: "bg-teal-50", popular: true },
+  PRO_500:     { label: "Pro",     icon: CheckCircle2, color: "text-purple-600", bg: "bg-purple-50" },
 };
 
 const STATUS_META: Record<string, { label: string; variant: "success" | "destructive" | "warning" | "secondary" }> = {
@@ -38,8 +38,9 @@ export default function BillingPage() {
     try {
       const { redirectUrl } = await createCheckout(TENANT_ID, bundleId, data.currency);
       window.location.href = redirectUrl;
-    } catch {
-      toast.error("حدث خطأ أثناء بدء عملية الدفع");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      toast.error(msg ?? "حدث خطأ أثناء بدء عملية الدفع");
       setLoading(null);
     }
   };
