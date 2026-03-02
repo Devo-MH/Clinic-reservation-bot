@@ -149,7 +149,7 @@ export async function apiRoutes(app: FastifyInstance) {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
     const [tenant, total, confirmed, cancelled, thisMonth, noShows] = await Promise.all([
-      prisma.tenant.findUnique({ where: { id: tenantId }, select: { subscriptionTier: true } }),
+      prisma.tenant.findUnique({ where: { id: tenantId }, select: { credits: true } }),
       prisma.appointment.count({ where: { tenantId } }),
       prisma.appointment.count({ where: { tenantId, status: "CONFIRMED" } }),
       prisma.appointment.count({ where: { tenantId, status: "CANCELLED" } }),
@@ -157,8 +157,7 @@ export async function apiRoutes(app: FastifyInstance) {
       prisma.appointment.count({ where: { tenantId, status: "NO_SHOW" } }),
     ]);
 
-    const limit = tenant ? (TIER_LIMITS[tenant.subscriptionTier] ?? null) : null;
-    return { total, confirmed, cancelled, thisMonth, noShows, limit };
+    return { total, confirmed, cancelled, thisMonth, noShows, credits: tenant?.credits ?? 0 };
   });
 
   app.get("/api/analytics/weekly", async (req, reply) => {

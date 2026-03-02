@@ -18,13 +18,15 @@ model Tenant {
   accessToken     String   // Meta access token (encrypted at rest)
   timezone        String   @default("Asia/Riyadh")
   locale          Locale   @default(AR)
-  subscriptionTier SubscriptionTier @default(STARTER)
+  country         Country  @default(GULF)
   isActive        Boolean  @default(true)
   settings        Json     @default("{}")
   clinicCode        String?  @unique // short memorable login code e.g. "RAYA"
   trialStartedAt    DateTime?
   ownerPhone        String?  // clinic admin WhatsApp for notifications
   dashboardPassword String?  // bcrypt hash for dashboard login
+  credits           Int      @default(0)
+  creditAlertSent   Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -33,6 +35,7 @@ model Tenant {
   appointments  Appointment[]
   patients      Patient[]
   conversations Conversation[]
+  payments      Payment[]
 
   @@map("tenants")
 }
@@ -178,6 +181,27 @@ model Conversation {
   @@map("conversations")
 }
 
+// ─── Payments ─────────────────────────────────────────────────────────────────
+
+model Payment {
+  id         String         @id @default(cuid())
+  tenantId   String
+  bundle     String         // "STARTER_50" | "GROWTH_200" | "PRO_500"
+  credits    Int            // credits purchased
+  amount     Float          // amount charged
+  currency   String         // "SAR" | "AED" | "EGP" etc.
+  gateway    PaymentGateway
+  gatewayRef String?        // gateway transaction/order ID
+  status     PaymentStatus  @default(PENDING)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("payments")
+}
+
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
 enum Locale {
@@ -185,11 +209,20 @@ enum Locale {
   EN
 }
 
-enum SubscriptionTier {
-  STARTER   // 1 doctor, 150 appts/mo  — 399 EGP / 99 SAR
-  SOLO      // 1 doctor, 500 appts/mo  — 699 EGP / 179 SAR
-  GROWTH    // 5 doctors, 1000 appts/mo — 999 EGP / 299 SAR
-  CLINIC    // unlimited               — 1999 EGP / 599 SAR
+enum Country {
+  EGYPT
+  GULF
+}
+
+enum PaymentGateway {
+  TAP
+  PAYMOB
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
 }
 
 enum AppointmentStatus {

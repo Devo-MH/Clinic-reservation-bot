@@ -130,3 +130,32 @@ export const getWeeklyData = (tenantId: string) =>
 
 export const getDoctorAnalytics = (doctorId: string, tenantId: string) =>
   api.get<DoctorAnalytics>("/analytics/doctor", { params: { doctorId, tenantId } }).then((r) => r.data);
+
+// ── Billing ──────────────────────────────────────────────────────────────────
+
+export type BillingBundle = { credits: number; prices: Record<string, number> };
+
+export type PaymentRecord = {
+  id: string;
+  bundle: string;
+  credits: number;
+  amount: number;
+  currency: string;
+  gateway: string;
+  status: string;
+  createdAt: string;
+};
+
+export type BillingBalance = {
+  credits: number;
+  country: string;
+  currency: string;
+  bundles: Record<string, BillingBundle>;
+  payments: PaymentRecord[];
+};
+
+export const getBillingBalance = (tenantId: string) =>
+  axios.get<BillingBalance>("/billing/balance", { params: { tenantId } }).then((r) => r.data);
+
+export const createCheckout = (tenantId: string, bundleId: string, currency: string) =>
+  axios.post<{ paymentId: string; redirectUrl: string }>("/billing/checkout", { tenantId, bundleId, currency }).then((r) => r.data);

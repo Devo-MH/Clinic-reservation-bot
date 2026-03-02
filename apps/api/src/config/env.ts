@@ -21,6 +21,18 @@ const envSchema = z.object({
   // OpenAI (optional — bot works without it using keyword fallback)
   OPENAI_API_KEY: z.string().default(""),
 
+  // Tap Payments (Gulf)
+  TAP_SECRET_KEY: z.string().default(""),
+
+  // Paymob (Egypt)
+  PAYMOB_API_KEY: z.string().default(""),
+  PAYMOB_INTEGRATION_ID: z.string().default(""),
+  PAYMOB_IFRAME_ID: z.string().default(""),
+  PAYMOB_HMAC_SECRET: z.string().default(""),
+
+  // Railway public domain (for callback URLs)
+  RAILWAY_PUBLIC_DOMAIN: z.string().default(""),
+
   // Optional
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
 });

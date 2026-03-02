@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, CalendarDays, Users, Clock,
-  Stethoscope, LogOut, ChevronLeft, Layers, Menu, X,
+  Stethoscope, LogOut, ChevronLeft, Layers, Menu, X, CreditCard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +12,7 @@ const NAV = [
   { to: "/doctors",      icon: Users,           label: "الأطباء" },
   { to: "/services",     icon: Layers,          label: "الخدمات" },
   { to: "/schedule",     icon: Clock,           label: "الجداول" },
+  { to: "/billing",      icon: CreditCard,      label: "الرصيد" },
 ];
 
 // ── Sidebar content (shared between desktop sidebar and mobile drawer) ─────────

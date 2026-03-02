@@ -21,7 +21,7 @@ async function main() {
       accessToken: "DEMO_ACCESS_TOKEN",
       timezone: "Asia/Riyadh",
       locale: "AR",
-      subscriptionTier: "GROWTH",
+      credits: 100,
     },
   });
   console.log(`✅ Tenant: ${tenant.name} (${tenant.id})`);
