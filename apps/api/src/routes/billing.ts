@@ -204,6 +204,27 @@ export async function billingRoutes(app: FastifyInstance) {
     }
   });
 
+  // GET /billing/paymob/return — Paymob iframe redirect URL after payment
+  app.get("/billing/paymob/return", async (req, reply) => {
+    const { success, merchant_order_id, id } = req.query as Record<string, string>;
+    if (!merchant_order_id) return reply.redirect("/billing?failed=1");
+
+    if (success === "true") {
+      const payment = await prisma.payment.update({
+        where: { id: merchant_order_id },
+        data: { status: "PAID", gatewayRef: id },
+      });
+      await prisma.tenant.update({
+        where: { id: payment.tenantId },
+        data: { credits: { increment: payment.credits }, creditAlertSent: false },
+      });
+      return reply.redirect("/billing?success=1");
+    }
+
+    await prisma.payment.update({ where: { id: merchant_order_id }, data: { status: "FAILED" } });
+    return reply.redirect("/billing?failed=1");
+  });
+
   // GET /billing/tap/return — Tap redirects here after payment
   app.get("/billing/tap/return", async (req, reply) => {
     const { paymentId, tap_id, status } = req.query as Record<string, string>;
