@@ -3,6 +3,42 @@ import { prisma } from "@/lib/prisma.js";
 import { createHmac } from "crypto";
 import { env } from "@/config/env.js";
 
+// ── Commission helper ──────────────────────────────────────────────────────────
+
+async function createCommission(paymentId: string) {
+  try {
+    const payment = await prisma.payment.findUnique({
+      where: { id: paymentId },
+      include: { tenant: { select: { sellerId: true } } },
+    });
+
+    if (!payment || !payment.tenant.sellerId) return;
+
+    const seller = await prisma.seller.findUnique({
+      where: { id: payment.tenant.sellerId },
+      select: { commissionRate: true, isActive: true },
+    });
+
+    if (!seller || !seller.isActive) return;
+
+    const amount = Math.round(payment.amount * seller.commissionRate * 100) / 100;
+
+    await prisma.commission.upsert({
+      where: { paymentId },
+      create: {
+        sellerId: payment.tenant.sellerId,
+        paymentId,
+        tenantId: payment.tenantId,
+        amount,
+        currency: payment.currency,
+      },
+      update: {},
+    });
+  } catch {
+    // Non-critical — don't fail payment flow
+  }
+}
+
 // ── Bundle definitions ─────────────────────────────────────────────────────────
 
 export const BUNDLES = {
@@ -218,6 +254,7 @@ export async function billingRoutes(app: FastifyInstance) {
         where: { id: payment.tenantId },
         data: { credits: { increment: payment.credits }, creditAlertSent: false },
       });
+      await createCommission(merchant_order_id);
       return reply.redirect("/billing?success=1");
     }
 
@@ -239,6 +276,7 @@ export async function billingRoutes(app: FastifyInstance) {
         where: { id: payment.tenantId },
         data: { credits: { increment: payment.credits }, creditAlertSent: false },
       });
+      await createCommission(paymentId);
       return reply.redirect("/billing?success=1");
     }
 
@@ -261,6 +299,7 @@ export async function billingRoutes(app: FastifyInstance) {
         where: { id: payment.tenantId },
         data: { credits: { increment: payment.credits }, creditAlertSent: false },
       });
+      await createCommission(paymentId);
     } else if (body.status === "FAILED" || body.status === "CANCELLED") {
       await prisma.payment.update({ where: { id: paymentId }, data: { status: "FAILED" } });
     }
@@ -305,6 +344,7 @@ export async function billingRoutes(app: FastifyInstance) {
         where: { id: payment.tenantId },
         data: { credits: { increment: payment.credits }, creditAlertSent: false },
       });
+      await createCommission(paymentId);
     } else {
       await prisma.payment.update({ where: { id: paymentId }, data: { status: "FAILED" } });
     }

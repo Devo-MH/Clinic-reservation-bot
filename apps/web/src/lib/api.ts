@@ -194,7 +194,7 @@ export const getAdminTenants = (secret: string) =>
 export const createAdminTenant = (secret: string, data: {
   name: string; clinicCode: string; dashboardPassword: string;
   phoneNumberId: string; wabaId: string; accessToken: string;
-  ownerPhone?: string; locale?: string; country?: string; timezone?: string; credits?: number;
+  ownerPhone?: string; locale?: string; country?: string; timezone?: string; credits?: number; sellerId?: string;
 }) => adminApi(secret).post<{ id: string; name: string; clinicCode: string }>("/tenants", data).then((r) => r.data);
 
 export const updateAdminTenant = (secret: string, id: string, data: {
@@ -203,3 +203,45 @@ export const updateAdminTenant = (secret: string, id: string, data: {
 
 export const deleteAdminTenant = (secret: string, id: string) =>
   adminApi(secret).delete(`/tenants/${id}`).then((r) => r.data);
+
+export type AdminSeller = {
+  id: string; name: string; phone: string; referralCode: string;
+  commissionRate: number; isActive: boolean; createdAt: string;
+  tenantCount: number; totalEarned: number; pendingPayout: number;
+};
+
+export const getAdminSellers = (secret: string) =>
+  adminApi(secret).get<AdminSeller[]>("/sellers").then((r) => r.data);
+
+export const createAdminSeller = (secret: string, data: {
+  name: string; phone: string; referralCode: string; password: string; commissionRate?: number;
+}) => adminApi(secret).post<{ id: string; name: string; referralCode: string }>("/sellers", data).then((r) => r.data);
+
+export const updateAdminSeller = (secret: string, id: string, data: {
+  isActive?: boolean; commissionRate?: number; name?: string; password?: string;
+}) => adminApi(secret).patch(`/sellers/${id}`, data).then((r) => r.data);
+
+export const payAllCommissions = (secret: string, sellerId: string) =>
+  adminApi(secret).patch(`/sellers/${sellerId}/pay-all`, {}).then((r) => r.data);
+
+// ── Seller (affiliate) ────────────────────────────────────────────────────────
+
+export type SellerDashboardData = {
+  seller: { id: string; name: string; referralCode: string; commissionRate: number };
+  stats: { tenantCount: number; totalEarned: number; pendingPayout: number };
+  tenants: { id: string; name: string; clinicCode: string | null; country: string; isActive: boolean; createdAt: string; _count: { appointments: number } }[];
+  commissions: {
+    id: string; tenantName: string; bundle: string; paymentAmount: number;
+    commissionAmount: number; currency: string; status: string; createdAt: string;
+  }[];
+};
+
+export const sellerLogin = (referralCode: string, password: string) =>
+  axios.post<{ token: string; sellerId: string; sellerName: string; referralCode: string }>(
+    "/seller/login", { referralCode, password }
+  ).then((r) => r.data);
+
+export const getSellerDashboard = (token: string) =>
+  axios.get<SellerDashboardData>("/seller/dashboard", {
+    headers: { Authorization: `Bearer ${token}` },
+  }).then((r) => r.data);

@@ -12,6 +12,7 @@ import { apiRoutes } from "./routes/api.js";
 import { authRoutes } from "./routes/auth.js";
 import { billingRoutes } from "./routes/billing.js";
 import { adminRoutes } from "./routes/admin.js";
+import { sellerRoutes } from "./routes/seller.js";
 import "./jobs/worker.js";
 import { startScheduler } from "./jobs/scheduler.js";
 
@@ -34,6 +35,7 @@ await app.register(apiRoutes);
 await app.register(authRoutes);
 await app.register(billingRoutes);
 await app.register(adminRoutes);
+await app.register(sellerRoutes);
 
 // ── Health check ──────────────────────────────────────────────────────────────
 

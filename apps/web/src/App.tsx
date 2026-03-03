@@ -11,6 +11,8 @@ import ServicesPage from "@/pages/Services";
 import BillingPage from "@/pages/Billing";
 import AdminLoginPage from "@/pages/AdminLogin";
 import AdminPanelPage from "@/pages/AdminPanel";
+import SellerLoginPage from "@/pages/SellerLogin";
+import SellerDashboardPage from "@/pages/SellerDashboard";
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const secret = sessionStorage.getItem("admin_secret");
@@ -25,6 +27,14 @@ export default function App() {
       {/* Admin routes */}
       <Route path="/admin/login" element={<AdminLoginPage />} />
       <Route path="/admin" element={<AdminRoute><AdminPanelPage /></AdminRoute>} />
+
+      {/* Seller routes */}
+      <Route path="/seller/login" element={<SellerLoginPage />} />
+      <Route path="/seller" element={
+        sessionStorage.getItem("seller_token")
+          ? <SellerDashboardPage />
+          : <Navigate to="/seller/login" replace />
+      } />
 
       <Route
         element={

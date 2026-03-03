@@ -27,6 +27,7 @@ model Tenant {
   dashboardPassword String?  // bcrypt hash for dashboard login
   credits           Int      @default(0)
   creditAlertSent   Boolean  @default(false)
+  sellerId          String?  // referral seller
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -36,8 +37,45 @@ model Tenant {
   patients      Patient[]
   conversations Conversation[]
   payments      Payment[]
+  seller        Seller?  @relation(fields: [sellerId], references: [id], onDelete: SetNull)
 
   @@map("tenants")
+}
+
+// ─── Sellers (referral / affiliate) ──────────────────────────────────────────
+
+model Seller {
+  id             String   @id @default(cuid())
+  name           String
+  phone          String
+  referralCode   String   @unique // e.g. "REF-AHMED"
+  password       String   // bcrypt hash
+  commissionRate Float    @default(0.25) // 25%
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  tenants     Tenant[]
+  commissions Commission[]
+
+  @@map("sellers")
+}
+
+model Commission {
+  id        String           @id @default(cuid())
+  sellerId  String
+  paymentId String           @unique // one commission per payment
+  tenantId  String
+  amount    Float            // commission amount (25% of bundle price)
+  currency  String
+  status    CommissionStatus @default(PENDING)
+  createdAt DateTime         @default(now())
+
+  seller  Seller  @relation(fields: [sellerId], references: [id])
+  payment Payment @relation(fields: [paymentId], references: [id])
+
+  @@index([sellerId])
+  @@map("commissions")
 }
 
 // ─── Doctors ──────────────────────────────────────────────────────────────────
@@ -196,7 +234,8 @@ model Payment {
   createdAt  DateTime       @default(now())
   updatedAt  DateTime       @updatedAt
 
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  commission Commission?
 
   @@index([tenantId])
   @@map("payments")
@@ -223,6 +262,11 @@ enum PaymentStatus {
   PENDING
   PAID
   FAILED
+}
+
+enum CommissionStatus {
+  PENDING
+  PAID
 }
 
 enum AppointmentStatus {
