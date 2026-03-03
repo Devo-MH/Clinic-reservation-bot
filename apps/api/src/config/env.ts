@@ -33,6 +33,9 @@ const envSchema = z.object({
   // Railway public domain (for callback URLs)
   RAILWAY_PUBLIC_DOMAIN: z.string().default(""),
 
+  // Beta mode — disables credit checks and deductions
+  BETA_MODE: z.coerce.boolean().default(false),
+
   // Optional
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
 });

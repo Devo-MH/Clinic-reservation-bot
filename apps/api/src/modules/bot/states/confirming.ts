@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma.js";
 import { scheduleReminders, cancelReminders } from "@/modules/notifications/reminders.js";
 import { sendDatePicker } from "./selectingDate.js";
 import { parseISO } from "date-fns";
+import { env } from "@/config/env.js";
 
 const LOW_CREDIT_THRESHOLD = 10;
 
@@ -50,22 +51,25 @@ export async function handleConfirming(
             : `✅ Your appointment has been rescheduled!\n\n👨‍⚕️ Doctor: ${doctorName}\n📅 ${appointment.scheduledAt.toLocaleString()}\n\nYou'll receive reminders 24h and 2h before. 🏥`,
         });
       } else {
-        // ── New booking: check credits ────────────────────────────────────────
-        const tenant = await prisma.tenant.findUnique({
-          where: { id: ctx.tenant.id },
-          select: { credits: true, creditAlertSent: true, ownerPhone: true },
-        });
-
-        if (!tenant || tenant.credits <= 0) {
-          await resetConversation(conversation.id);
-          await ctx.send({
-            type: "text",
-            to: ctx.phone,
-            body: isArabic
-              ? "عذراً، العيادة لا تقبل حجوزات جديدة حالياً. يرجى التواصل مع العيادة مباشرة."
-              : "Sorry, the clinic is not accepting new bookings at the moment. Please contact the clinic directly.",
+        // ── New booking ───────────────────────────────────────────────────────
+        if (!env.BETA_MODE) {
+          // Credit check — only enforced outside beta
+          const tenant = await prisma.tenant.findUnique({
+            where: { id: ctx.tenant.id },
+            select: { credits: true, creditAlertSent: true, ownerPhone: true },
           });
-          return;
+
+          if (!tenant || tenant.credits <= 0) {
+            await resetConversation(conversation.id);
+            await ctx.send({
+              type: "text",
+              to: ctx.phone,
+              body: isArabic
+                ? "عذراً، العيادة لا تقبل حجوزات جديدة حالياً. يرجى التواصل مع العيادة مباشرة."
+                : "Sorry, the clinic is not accepting new bookings at the moment. Please contact the clinic directly.",
+            });
+            return;
+          }
         }
 
         const appointment = await prisma.appointment.create({
@@ -83,29 +87,31 @@ export async function handleConfirming(
         await scheduleReminders(appointment.id, appointment.scheduledAt);
         await resetConversation(conversation.id);
 
-        // Deduct 1 credit and check for low balance
-        const updated = await prisma.tenant.update({
-          where: { id: ctx.tenant.id },
-          data: { credits: { decrement: 1 } },
-          select: { credits: true, creditAlertSent: true, ownerPhone: true },
-        });
-
-        if (
-          updated.credits <= LOW_CREDIT_THRESHOLD &&
-          !updated.creditAlertSent &&
-          updated.ownerPhone
-        ) {
-          await prisma.tenant.update({
+        if (!env.BETA_MODE) {
+          // Deduct 1 credit and check for low balance
+          const updated = await prisma.tenant.update({
             where: { id: ctx.tenant.id },
-            data: { creditAlertSent: true },
+            data: { credits: { decrement: 1 } },
+            select: { credits: true, creditAlertSent: true, ownerPhone: true },
           });
-          await ctx.send({
-            type: "text",
-            to: updated.ownerPhone,
-            body: isArabic
-              ? `⚠️ تنبيه: رصيد الحجوزات في عيادتك أصبح منخفضاً (${updated.credits} حجوزات متبقية).\nيرجى شراء رصيد إضافي من لوحة التحكم لضمان استمرار الخدمة.`
-              : `⚠️ Low credit alert: Your clinic has ${updated.credits} bookings remaining.\nPlease top up from the dashboard to ensure uninterrupted service.`,
-          });
+
+          if (
+            updated.credits <= LOW_CREDIT_THRESHOLD &&
+            !updated.creditAlertSent &&
+            updated.ownerPhone
+          ) {
+            await prisma.tenant.update({
+              where: { id: ctx.tenant.id },
+              data: { creditAlertSent: true },
+            });
+            await ctx.send({
+              type: "text",
+              to: updated.ownerPhone,
+              body: isArabic
+                ? `⚠️ تنبيه: رصيد الحجوزات في عيادتك أصبح منخفضاً (${updated.credits} حجوزات متبقية).\nيرجى شراء رصيد إضافي من لوحة التحكم لضمان استمرار الخدمة.`
+                : `⚠️ Low credit alert: Your clinic has ${updated.credits} bookings remaining.\nPlease top up from the dashboard to ensure uninterrupted service.`,
+            });
+          }
         }
 
         await ctx.send({
