@@ -11,6 +11,7 @@ import { webhookRoutes } from "./routes/webhook.js";
 import { apiRoutes } from "./routes/api.js";
 import { authRoutes } from "./routes/auth.js";
 import { billingRoutes } from "./routes/billing.js";
+import { adminRoutes } from "./routes/admin.js";
 import "./jobs/worker.js";
 import { startScheduler } from "./jobs/scheduler.js";
 
@@ -32,6 +33,7 @@ await app.register(webhookRoutes);
 await app.register(apiRoutes);
 await app.register(authRoutes);
 await app.register(billingRoutes);
+await app.register(adminRoutes);
 
 // ── Health check ──────────────────────────────────────────────────────────────
 

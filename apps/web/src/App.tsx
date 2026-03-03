@@ -9,11 +9,23 @@ import DoctorDashboardPage from "@/pages/DoctorDashboard";
 import SchedulePage from "@/pages/Schedule";
 import ServicesPage from "@/pages/Services";
 import BillingPage from "@/pages/Billing";
+import AdminLoginPage from "@/pages/AdminLogin";
+import AdminPanelPage from "@/pages/AdminPanel";
+
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const secret = sessionStorage.getItem("admin_secret");
+  return secret ? <>{children}</> : <Navigate to="/admin/login" replace />;
+}
 
 export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+
+      {/* Admin routes */}
+      <Route path="/admin/login" element={<AdminLoginPage />} />
+      <Route path="/admin" element={<AdminRoute><AdminPanelPage /></AdminRoute>} />
+
       <Route
         element={
           <ProtectedRoute>

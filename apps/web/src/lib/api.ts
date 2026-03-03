@@ -159,3 +159,47 @@ export const getBillingBalance = (tenantId: string) =>
 
 export const createCheckout = (tenantId: string, bundleId: string, currency: string) =>
   axios.post<{ paymentId: string; redirectUrl: string }>("/billing/checkout", { tenantId, bundleId, currency }).then((r) => r.data);
+
+// ── Admin ─────────────────────────────────────────────────────────────────────
+
+function adminApi(secret: string) {
+  return axios.create({
+    baseURL: "/admin",
+    headers: { "Content-Type": "application/json", "x-admin-secret": secret },
+  });
+}
+
+export type AdminTenant = {
+  id: string;
+  name: string;
+  clinicCode: string | null;
+  country: string;
+  locale: string;
+  isActive: boolean;
+  credits: number;
+  ownerPhone: string | null;
+  phoneNumberId: string;
+  createdAt: string;
+  _count: { appointments: number; patients: number; doctors: number };
+};
+
+export type AdminStats = { tenantCount: number; appointmentCount: number; patientCount: number };
+
+export const getAdminStats = (secret: string) =>
+  adminApi(secret).get<AdminStats>("/stats").then((r) => r.data);
+
+export const getAdminTenants = (secret: string) =>
+  adminApi(secret).get<AdminTenant[]>("/tenants").then((r) => r.data);
+
+export const createAdminTenant = (secret: string, data: {
+  name: string; clinicCode: string; dashboardPassword: string;
+  phoneNumberId: string; wabaId: string; accessToken: string;
+  ownerPhone?: string; locale?: string; country?: string; timezone?: string; credits?: number;
+}) => adminApi(secret).post<{ id: string; name: string; clinicCode: string }>("/tenants", data).then((r) => r.data);
+
+export const updateAdminTenant = (secret: string, id: string, data: {
+  credits?: number; isActive?: boolean; name?: string; dashboardPassword?: string;
+}) => adminApi(secret).patch(`/tenants/${id}`, data).then((r) => r.data);
+
+export const deleteAdminTenant = (secret: string, id: string) =>
+  adminApi(secret).delete(`/tenants/${id}`).then((r) => r.data);

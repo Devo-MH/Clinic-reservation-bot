@@ -36,6 +36,9 @@ const envSchema = z.object({
   // Beta mode — disables credit checks and deductions
   BETA_MODE: z.coerce.boolean().default(false),
 
+  // Super-admin secret for the admin panel
+  ADMIN_SECRET: z.string().default("change-me-admin-secret"),
+
   // Optional
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
 });
