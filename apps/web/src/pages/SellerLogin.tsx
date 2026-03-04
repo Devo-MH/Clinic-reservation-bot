@@ -30,7 +30,7 @@ export default function SellerLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4" dir="ltr">
       <Card className="w-full max-w-sm shadow-md">
         <CardHeader className="text-center pb-2">
           <div className="w-12 h-12 rounded-xl bg-teal-700 flex items-center justify-center mx-auto mb-3">

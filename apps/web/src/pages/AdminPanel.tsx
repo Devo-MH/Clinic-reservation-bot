@@ -76,7 +76,7 @@ function CreateTenantDialog({ sellers, onCreated }: { sellers: AdminSeller[]; on
           <Plus className="w-4 h-4" /> New Clinic
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto" dir="ltr">
         <DialogHeader>
           <DialogTitle>Create New Clinic</DialogTitle>
         </DialogHeader>
@@ -202,7 +202,7 @@ function EditCreditsDialog({ tenant, onUpdated }: { tenant: AdminTenant; onUpdat
           <Pencil className="w-3.5 h-3.5" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-xs">
+      <DialogContent className="max-w-xs" dir="ltr">
         <DialogHeader>
           <DialogTitle>Edit Credits — {tenant.name}</DialogTitle>
         </DialogHeader>
@@ -252,7 +252,7 @@ function CreateSellerDialog({ onCreated }: { onCreated: () => void }) {
           <Plus className="w-4 h-4" /> New Seller
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="max-w-sm" dir="ltr">
         <DialogHeader><DialogTitle>Create New Seller</DialogTitle></DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-3 pt-2">
           <div className="space-y-1">
@@ -449,7 +449,7 @@ export default function AdminPanel() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50" dir="ltr">
       {/* Header */}
       <div className="bg-slate-800 text-white px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
