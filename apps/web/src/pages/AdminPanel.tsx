@@ -55,7 +55,7 @@ function CreateTenantDialog({ sellers, onCreated }: { sellers: AdminSeller[]; on
       await createAdminTenant(getSecret(), {
         ...form,
         credits: parseInt(form.credits) || 100,
-        sellerId: form.sellerId || undefined,
+        sellerId: form.sellerId && form.sellerId !== "none" ? form.sellerId : undefined,
       });
       toast.success(`Clinic "${form.name}" created`);
       setForm(EMPTY_TENANT_FORM);
@@ -157,7 +157,7 @@ function CreateTenantDialog({ sellers, onCreated }: { sellers: AdminSeller[]; on
               <Select value={form.sellerId} onValueChange={(v) => set("sellerId", v)}>
                 <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
                   {sellers.map((s) => (
                     <SelectItem key={s.id} value={s.id}>{s.name} ({s.referralCode})</SelectItem>
                   ))}
