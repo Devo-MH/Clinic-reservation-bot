@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/select";
 import {
   ShieldCheck, Building2, CalendarDays, Users, Plus,
-  ToggleLeft, ToggleRight, Pencil, Trash2, LogOut, DollarSign, Clock,
+  ToggleLeft, ToggleRight, Pencil, Trash2, LogOut, DollarSign,
 } from "lucide-react";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -548,10 +548,6 @@ export default function AdminPanel() {
                     </thead>
                     <tbody className="divide-y divide-border/50">
                       {tenants.map((t) => {
-                        const seller = sellers.find((s) => {
-                          // match via tenantCount — not ideal but sellers don't expose tenant IDs here
-                          return false; // placeholder — seller name shown separately
-                        });
                         return (
                           <tr key={t.id} className="hover:bg-muted/20 transition-colors">
                             <td className="px-5 py-3">
@@ -570,9 +566,7 @@ export default function AdminPanel() {
                             </td>
                             <td className="px-3 py-3 text-right text-muted-foreground">{t._count.appointments}</td>
                             <td className="px-3 py-3 text-right text-muted-foreground">{t._count.patients}</td>
-                            <td className="px-3 py-3 text-xs text-muted-foreground">
-                              {seller ? seller.name : "—"}
-                            </td>
+                            <td className="px-3 py-3 text-xs text-muted-foreground">—</td>
                             <td className="px-3 py-3 text-muted-foreground text-xs">
                               {format(new Date(t.createdAt), "dd/MM/yy")}
                             </td>
