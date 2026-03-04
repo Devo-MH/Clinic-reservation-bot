@@ -28,12 +28,12 @@ const TENANT_ID = localStorage.getItem("clinic_tenant_id") ?? import.meta.env.VI
 
 const STATUSES = ["CONFIRMED", "PENDING", "CANCELLED", "NO_SHOW", "COMPLETED"] as const;
 
-const STATUS_META: Record<string, { label: string; variant: "success" | "warning" | "destructive" | "secondary" | "info" }> = {
-  CONFIRMED: { label: "مؤكد", variant: "success" },
-  PENDING: { label: "قيد الانتظار", variant: "warning" },
-  CANCELLED: { label: "ملغي", variant: "destructive" },
-  NO_SHOW: { label: "لم يحضر", variant: "secondary" },
-  COMPLETED: { label: "مكتمل", variant: "info" },
+const STATUS_META: Record<string, { label: string; variant: "success" | "warning" | "destructive" | "secondary" | "info"; border: string }> = {
+  CONFIRMED: { label: "مؤكد", variant: "success", border: "border-l-emerald-500" },
+  PENDING: { label: "قيد الانتظار", variant: "warning", border: "border-l-amber-400" },
+  CANCELLED: { label: "ملغي", variant: "destructive", border: "border-l-red-400" },
+  NO_SHOW: { label: "لم يحضر", variant: "secondary", border: "border-l-gray-300" },
+  COMPLETED: { label: "مكتمل", variant: "info", border: "border-l-teal-500" },
 };
 
 // ── Create Appointment Modal ────────────────────────────────────────────────────
@@ -227,7 +227,10 @@ export default function AppointmentsPage() {
         <div>
           <h1 className="text-xl font-bold text-foreground">المواعيد</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            {appointments?.length ?? 0} نتيجة
+            {hasFilters && filtered?.length !== appointments?.length
+              ? <span className="text-primary font-medium">{filtered?.length} من {appointments?.length}</span>
+              : <span>{appointments?.length ?? 0} نتيجة</span>
+            }
           </p>
         </div>
         <Button onClick={() => setCreateOpen(true)} className="gap-2">
@@ -314,7 +317,7 @@ export default function AppointmentsPage() {
             const dt = new Date(appt.scheduledAt);
             const canAction = appt.status === "PENDING" || appt.status === "CONFIRMED";
             return (
-              <Card key={appt.id} className="border-0 shadow-sm">
+              <Card key={appt.id} className={`border-0 border-l-2 ${badge.border} shadow-sm`}>
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-start gap-3 min-w-0">
@@ -403,7 +406,7 @@ export default function AppointmentsPage() {
                   const dt = new Date(appt.scheduledAt);
                   const canAction = appt.status === "PENDING" || appt.status === "CONFIRMED";
                   return (
-                    <tr key={appt.id} className="hover:bg-muted/30 transition-colors group">
+                    <tr key={appt.id} className={`hover:bg-muted/30 transition-colors group border-l-2 ${badge.border}`}>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-2.5">
                           <div className="w-8 h-8 rounded-full bg-teal-50 flex items-center justify-center flex-shrink-0">

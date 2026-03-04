@@ -180,6 +180,7 @@ export type AdminTenant = {
   ownerPhone: string | null;
   phoneNumberId: string;
   createdAt: string;
+  sellerId: string | null;
   _count: { appointments: number; patients: number; doctors: number };
 };
 

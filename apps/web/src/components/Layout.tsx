@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, CalendarDays, Users, Clock,
-  Stethoscope, LogOut, ChevronLeft, Layers, Menu, X, CreditCard,
+  Stethoscope, LogOut, Layers, Menu, X, CreditCard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -52,10 +52,10 @@ function SidebarContent({ onNav }: { onNav?: () => void }) {
             onClick={onNav}
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 group",
+                "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group",
                 isActive
-                  ? "bg-white/15 text-white"
-                  : "text-white/55 hover:text-white hover:bg-white/8"
+                  ? "bg-white text-teal-800 shadow-sm"
+                  : "text-white/60 hover:text-white hover:bg-white/10"
               )
             }
           >
@@ -63,10 +63,10 @@ function SidebarContent({ onNav }: { onNav?: () => void }) {
               <>
                 <Icon className={cn(
                   "w-4 h-4 flex-shrink-0 transition-colors",
-                  isActive ? "text-white" : "text-white/45 group-hover:text-white/70"
+                  isActive ? "text-teal-700" : "text-white/50 group-hover:text-white/80"
                 )} />
                 <span className="flex-1">{label}</span>
-                {isActive && <ChevronLeft className="w-3.5 h-3.5 text-white/35" />}
+                {isActive && <div className="w-1.5 h-1.5 rounded-full bg-teal-500" />}
               </>
             )}
           </NavLink>

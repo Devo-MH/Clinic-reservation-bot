@@ -23,8 +23,12 @@ import {
 } from "@/components/ui/select";
 import {
   ShieldCheck, Building2, CalendarDays, Users, Plus,
-  ToggleLeft, ToggleRight, Pencil, Trash2, LogOut, DollarSign,
+  ToggleLeft, ToggleRight, Pencil, Trash2, LogOut, DollarSign, Copy, Search,
 } from "lucide-react";
+
+function copyToClipboard(text: string, label = "Copied!") {
+  navigator.clipboard.writeText(text).then(() => toast.success(label));
+}
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -351,7 +355,12 @@ function SellersTab() {
                       <p className="text-xs text-muted-foreground">{s.phone}</p>
                     </td>
                     <td className="px-3 py-3">
-                      <code className="text-xs bg-muted px-1.5 py-0.5 rounded">{s.referralCode}</code>
+                      <div className="flex items-center gap-1">
+                        <code className="text-xs bg-muted px-1.5 py-0.5 rounded">{s.referralCode}</code>
+                        <button onClick={() => copyToClipboard(s.referralCode, "Code copied")} className="text-muted-foreground hover:text-foreground transition-colors">
+                          <Copy className="w-3 h-3" />
+                        </button>
+                      </div>
                     </td>
                     <td className="px-3 py-3 text-right text-muted-foreground">{s.tenantCount}</td>
                     <td className="px-3 py-3 text-right font-semibold text-teal-700">
@@ -405,6 +414,7 @@ export default function AdminPanel() {
   const qc = useQueryClient();
   const secret = getSecret();
   const [tab, setTab] = useState<"clinics" | "sellers">("clinics");
+  const [clinicSearch, setClinicSearch] = useState("");
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["admin-stats"],
@@ -451,15 +461,17 @@ export default function AdminPanel() {
   return (
     <div className="min-h-screen bg-gray-50" dir="ltr">
       {/* Header */}
-      <div className="bg-slate-800 text-white px-6 py-4 flex items-center justify-between">
+      <div className="bg-gradient-to-r from-slate-900 to-teal-800 text-white px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <ShieldCheck className="w-6 h-6" />
+          <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center">
+            <ShieldCheck className="w-5 h-5" />
+          </div>
           <div>
             <h1 className="font-bold text-base leading-none">ClinicBot Admin</h1>
-            <p className="text-xs text-slate-400 mt-0.5">Super Admin Panel</p>
+            <p className="text-xs text-slate-300 mt-0.5">Super Admin Panel</p>
           </div>
         </div>
-        <Button variant="ghost" size="sm" onClick={handleLogout} className="text-slate-300 hover:text-white gap-2">
+        <Button variant="ghost" size="sm" onClick={handleLogout} className="text-slate-300 hover:text-white hover:bg-white/10 gap-2">
           <LogOut className="w-4 h-4" /> Logout
         </Button>
       </div>
@@ -468,20 +480,20 @@ export default function AdminPanel() {
         {/* Stats */}
         <div className="grid grid-cols-4 gap-4">
           {[
-            { label: "Total Clinics", value: stats?.tenantCount, icon: Building2, color: "text-blue-600", bg: "bg-blue-50" },
-            { label: "Appointments", value: stats?.appointmentCount, icon: CalendarDays, color: "text-teal-600", bg: "bg-teal-50" },
-            { label: "Patients", value: stats?.patientCount, icon: Users, color: "text-purple-600", bg: "bg-purple-50" },
-            { label: "Sellers", value: sellers.length, icon: DollarSign, color: "text-amber-600", bg: "bg-amber-50" },
-          ].map(({ label, value, icon: Icon, color, bg }) => (
-            <Card key={label} className="border-0 shadow-sm">
+            { label: "Total Clinics", value: stats?.tenantCount, icon: Building2, color: "text-blue-600", bg: "bg-blue-50", border: "border-t-blue-500" },
+            { label: "Appointments", value: stats?.appointmentCount, icon: CalendarDays, color: "text-teal-600", bg: "bg-teal-50", border: "border-t-teal-500" },
+            { label: "Patients", value: stats?.patientCount, icon: Users, color: "text-purple-600", bg: "bg-purple-50", border: "border-t-purple-500" },
+            { label: "Sellers", value: sellers.length, icon: DollarSign, color: "text-amber-600", bg: "bg-amber-50", border: "border-t-amber-500" },
+          ].map(({ label, value, icon: Icon, color, bg, border }) => (
+            <Card key={label} className={`border-0 border-t-2 ${border} shadow-sm`}>
               <CardContent className="p-4 flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-lg ${bg} flex items-center justify-center flex-shrink-0`}>
                   <Icon className={`w-5 h-5 ${color}`} />
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">{label}</p>
-                  {statsLoading ? <Skeleton className="h-6 w-12 mt-0.5" /> : (
-                    <p className="text-2xl font-bold">{value ?? 0}</p>
+                  {statsLoading ? <Skeleton className="h-7 w-12 mt-0.5" /> : (
+                    <p className="text-3xl font-bold tracking-tight">{value ?? 0}</p>
                   )}
                 </div>
               </CardContent>
@@ -512,16 +524,27 @@ export default function AdminPanel() {
         {/* Clinics Tab */}
         {tab === "clinics" && (
           <Card className="border-0 shadow-sm overflow-hidden">
-            <CardHeader className="px-5 pt-4 pb-0 flex flex-row items-center justify-between">
+            <CardHeader className="px-5 pt-4 pb-3 flex flex-row items-center justify-between">
               <CardTitle className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
                 <Building2 className="w-4 h-4" />
                 Clinics ({tenants?.length ?? 0})
               </CardTitle>
               <CreateTenantDialog sellers={sellers} onCreated={refetch} />
             </CardHeader>
-            <CardContent className="p-0 mt-4">
+            <div className="px-5 pb-3 border-b">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search clinics..."
+                  className="pl-8 h-8 text-sm"
+                  value={clinicSearch}
+                  onChange={(e) => setClinicSearch(e.target.value)}
+                />
+              </div>
+            </div>
+            <CardContent className="p-0">
               {tenantsLoading ? (
-                <div className="space-y-px px-5 pb-4">
+                <div className="space-y-px px-5 py-4">
                   {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-14 rounded-lg mb-2" />)}
                 </div>
               ) : !tenants?.length ? (
@@ -547,59 +570,69 @@ export default function AdminPanel() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/50">
-                      {tenants.map((t) => {
-                        return (
-                          <tr key={t.id} className="hover:bg-muted/20 transition-colors">
-                            <td className="px-5 py-3">
-                              <p className="font-medium">{t.name}</p>
-                              {t.ownerPhone && <p className="text-xs text-muted-foreground">{t.ownerPhone}</p>}
-                            </td>
-                            <td className="px-3 py-3">
-                              <code className="text-xs bg-muted px-1.5 py-0.5 rounded">{t.clinicCode ?? "—"}</code>
-                            </td>
-                            <td className="px-3 py-3 text-muted-foreground">{t.country}</td>
-                            <td className="px-3 py-3 text-right">
-                              <div className="flex items-center justify-end gap-1">
-                                <span className="font-semibold">{t.credits}</span>
-                                <EditCreditsDialog tenant={t} onUpdated={refetch} />
-                              </div>
-                            </td>
-                            <td className="px-3 py-3 text-right text-muted-foreground">{t._count.appointments}</td>
-                            <td className="px-3 py-3 text-right text-muted-foreground">{t._count.patients}</td>
-                            <td className="px-3 py-3 text-xs text-muted-foreground">—</td>
-                            <td className="px-3 py-3 text-muted-foreground text-xs">
-                              {format(new Date(t.createdAt), "dd/MM/yy")}
-                            </td>
-                            <td className="px-3 py-3">
-                              <Badge variant={t.isActive ? "success" : "secondary"} className="text-xs">
-                                {t.isActive ? "Active" : "Inactive"}
-                              </Badge>
-                            </td>
-                            <td className="px-3 py-3">
-                              <div className="flex items-center gap-1">
-                                <Button
-                                  variant="ghost" size="icon" className="h-7 w-7"
-                                  onClick={() => toggleActive.mutate({ id: t.id, isActive: !t.isActive })}
-                                >
-                                  {t.isActive
-                                    ? <ToggleRight className="w-4 h-4 text-teal-600" />
-                                    : <ToggleLeft className="w-4 h-4 text-muted-foreground" />}
-                                </Button>
-                                <Button
-                                  variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive"
-                                  onClick={() => {
-                                    if (confirm(`Delete "${t.name}"? This cannot be undone.`)) {
-                                      deleteTenant.mutate(t.id);
-                                    }
-                                  }}
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
+                      {(tenants ?? [])
+                        .filter((t) => !clinicSearch || t.name.toLowerCase().includes(clinicSearch.toLowerCase()) || (t.clinicCode ?? "").toLowerCase().includes(clinicSearch.toLowerCase()))
+                        .map((t) => {
+                          const sellerName = t.sellerId ? (sellers.find((s) => s.id === t.sellerId)?.name ?? "—") : "—";
+                          return (
+                            <tr key={t.id} className={`hover:bg-muted/20 transition-colors border-l-2 ${t.isActive ? "border-l-teal-500" : "border-l-gray-200"}`}>
+                              <td className="px-5 py-3">
+                                <p className="font-medium">{t.name}</p>
+                                {t.ownerPhone && <p className="text-xs text-muted-foreground">{t.ownerPhone}</p>}
+                              </td>
+                              <td className="px-3 py-3">
+                                <div className="flex items-center gap-1">
+                                  <code className="text-xs bg-muted px-1.5 py-0.5 rounded">{t.clinicCode ?? "—"}</code>
+                                  {t.clinicCode && (
+                                    <button onClick={() => copyToClipboard(t.clinicCode!, "Code copied")} className="text-muted-foreground hover:text-foreground transition-colors">
+                                      <Copy className="w-3 h-3" />
+                                    </button>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="px-3 py-3 text-muted-foreground">{t.country}</td>
+                              <td className="px-3 py-3 text-right">
+                                <div className="flex items-center justify-end gap-1">
+                                  <span className="font-semibold">{t.credits}</span>
+                                  <EditCreditsDialog tenant={t} onUpdated={refetch} />
+                                </div>
+                              </td>
+                              <td className="px-3 py-3 text-right text-muted-foreground">{t._count.appointments}</td>
+                              <td className="px-3 py-3 text-right text-muted-foreground">{t._count.patients}</td>
+                              <td className="px-3 py-3 text-xs text-muted-foreground">{sellerName}</td>
+                              <td className="px-3 py-3 text-muted-foreground text-xs">
+                                {format(new Date(t.createdAt), "dd/MM/yy")}
+                              </td>
+                              <td className="px-3 py-3">
+                                <Badge variant={t.isActive ? "success" : "secondary"} className="text-xs">
+                                  {t.isActive ? "Active" : "Inactive"}
+                                </Badge>
+                              </td>
+                              <td className="px-3 py-3">
+                                <div className="flex items-center gap-1">
+                                  <Button
+                                    variant="ghost" size="icon" className="h-7 w-7"
+                                    onClick={() => toggleActive.mutate({ id: t.id, isActive: !t.isActive })}
+                                  >
+                                    {t.isActive
+                                      ? <ToggleRight className="w-4 h-4 text-teal-600" />
+                                      : <ToggleLeft className="w-4 h-4 text-muted-foreground" />}
+                                  </Button>
+                                  <Button
+                                    variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive"
+                                    onClick={() => {
+                                      if (confirm(`Delete "${t.name}"? This cannot be undone.`)) {
+                                        deleteTenant.mutate(t.id);
+                                      }
+                                    }}
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </Button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
                     </tbody>
                   </table>
                 </div>

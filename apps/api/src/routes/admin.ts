@@ -45,6 +45,7 @@ export async function adminRoutes(app: FastifyInstance) {
         credits: true,
         ownerPhone: true,
         phoneNumberId: true,
+        sellerId: true,
         createdAt: true,
         _count: {
           select: { appointments: true, patients: true, doctors: true },

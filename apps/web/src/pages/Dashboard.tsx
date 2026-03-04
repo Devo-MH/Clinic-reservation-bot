@@ -30,6 +30,7 @@ const KPI_CARDS = [
     icon: CalendarDays,
     color: "text-teal-600",
     bg: "bg-teal-50",
+    border: "border-t-teal-500",
   },
   {
     key: "confirmed" as const,
@@ -37,6 +38,7 @@ const KPI_CARDS = [
     icon: CheckCircle2,
     color: "text-emerald-600",
     bg: "bg-emerald-50",
+    border: "border-t-emerald-500",
   },
   {
     key: "cancelled" as const,
@@ -44,6 +46,7 @@ const KPI_CARDS = [
     icon: XCircle,
     color: "text-red-500",
     bg: "bg-red-50",
+    border: "border-t-red-500",
   },
   {
     key: "noShows" as const,
@@ -51,8 +54,17 @@ const KPI_CARDS = [
     icon: AlertTriangle,
     color: "text-amber-500",
     bg: "bg-amber-50",
+    border: "border-t-amber-500",
   },
 ];
+
+const STATUS_LEFT_BORDER: Record<string, string> = {
+  CONFIRMED: "border-l-emerald-500",
+  PENDING: "border-l-amber-400",
+  CANCELLED: "border-l-red-400",
+  NO_SHOW: "border-l-gray-300",
+  COMPLETED: "border-l-teal-500",
+};
 
 export default function DashboardPage() {
   const today = new Date().toISOString().split("T")[0];
@@ -111,8 +123,8 @@ export default function DashboardPage() {
 
       {/* ── KPI Cards ────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        {KPI_CARDS.map(({ key, label, icon: Icon, color, bg }) => (
-          <Card key={key} className="border-0 shadow-sm hover:shadow-md transition-shadow">
+        {KPI_CARDS.map(({ key, label, icon: Icon, color, bg, border }) => (
+          <Card key={key} className={`border-0 border-t-2 ${border} shadow-sm hover:shadow-md transition-shadow`}>
             <CardContent className="p-4 md:p-5">
               <div className="flex items-start justify-between">
                 <div>
@@ -262,7 +274,7 @@ export default function DashboardPage() {
                 return (
                   <div
                     key={appt.id}
-                    className="flex items-center gap-4 p-3 rounded-xl hover:bg-muted/50 transition-colors"
+                    className={`flex items-center gap-4 p-3 rounded-xl hover:bg-muted/50 transition-colors border-l-2 ${STATUS_LEFT_BORDER[appt.status] ?? "border-l-gray-200"}`}
                   >
                     {/* Time pill */}
                     <div className="flex-shrink-0 w-14 h-11 rounded-xl bg-teal-50 flex flex-col items-center justify-center border border-teal-100">
