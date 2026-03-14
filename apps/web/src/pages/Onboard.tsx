@@ -2,7 +2,7 @@ import { useState } from "react";
 
 export default function OnboardPage() {
   const [form, setForm] = useState({
-    name: "", ownerName: "", ownerPhone: "",
+    name: "", ownerName: "", ownerPhone: "", businessPhone: "",
     country: "GULF" as "GULF" | "EGYPT",
   });
   const [loading, setLoading] = useState(false);
@@ -13,7 +13,7 @@ export default function OnboardPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim() || !form.ownerName.trim() || !form.ownerPhone.trim()) {
+    if (!form.name.trim() || !form.ownerName.trim() || !form.ownerPhone.trim() || !form.businessPhone.trim()) {
       setError("يرجى ملء جميع الحقول");
       return;
     }
@@ -23,7 +23,7 @@ export default function OnboardPage() {
       const res = await fetch("/onboard/request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, locale: "AR" }),
+        body: JSON.stringify({ ...form, locale: "AR", businessPhone: form.businessPhone }),
       });
       const data = await res.json() as { ok?: boolean; error?: string };
       if (!res.ok || !data.ok) {
@@ -94,7 +94,22 @@ export default function OnboardPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-white/80 mb-1">رقم واتساب للتواصل</label>
+                <label className="block text-sm font-medium text-white/80 mb-1">
+                  رقم واتساب البزنس 🏥
+                </label>
+                <p className="text-teal-300/70 text-xs mb-1.5">الرقم الذي سيستخدمه المرضى للحجز — يجب أن يكون واتساب بزنس</p>
+                <input
+                  type="tel" value={form.businessPhone} onChange={e => set("businessPhone", e.target.value)}
+                  placeholder="966501234567" dir="ltr"
+                  className="w-full px-4 py-2.5 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:border-white/60 transition-colors text-left"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white/80 mb-1">
+                  رقم واتساب الشخصي 📱
+                </label>
+                <p className="text-teal-300/70 text-xs mb-1.5">للتواصل معك وإرسال بيانات الدخول</p>
                 <input
                   type="tel" value={form.ownerPhone} onChange={e => set("ownerPhone", e.target.value)}
                   placeholder="966501234567" dir="ltr"

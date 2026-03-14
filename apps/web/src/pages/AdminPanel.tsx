@@ -561,7 +561,7 @@ export default function AdminPanel() {
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
                     <tr>
-                      {["Clinic", "Owner", "WhatsApp", "Lang", "Country", "Date", "Action"].map(h => (
+                      {["Clinic", "Owner", "Business WA 🏥", "Personal WA 📱", "Country", "Date", "Action"].map(h => (
                         <th key={h} className="px-4 py-2 text-left font-medium">{h}</th>
                       ))}
                     </tr>
@@ -573,13 +573,20 @@ export default function AdminPanel() {
                         <td className="px-4 py-3 text-gray-600">{r.ownerName}</td>
                         <td className="px-4 py-3">
                           <button
+                            onClick={() => { navigator.clipboard.writeText(r.businessPhone); toast.success("Copied!"); }}
+                            className="flex items-center gap-1 font-mono text-xs bg-green-50 hover:bg-green-100 text-green-700 px-2 py-1 rounded transition-colors"
+                          >
+                            {r.businessPhone} <Copy className="w-3 h-3" />
+                          </button>
+                        </td>
+                        <td className="px-4 py-3">
+                          <button
                             onClick={() => { navigator.clipboard.writeText(r.ownerPhone); toast.success("Copied!"); }}
                             className="flex items-center gap-1 font-mono text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded transition-colors"
                           >
                             {r.ownerPhone} <Copy className="w-3 h-3" />
                           </button>
                         </td>
-                        <td className="px-4 py-3"><Badge variant="outline">{r.locale}</Badge></td>
                         <td className="px-4 py-3"><Badge variant="outline">{r.country}</Badge></td>
                         <td className="px-4 py-3 text-gray-400 text-xs">{format(new Date(r.createdAt), "MMM d, HH:mm")}</td>
                         <td className="px-4 py-3">

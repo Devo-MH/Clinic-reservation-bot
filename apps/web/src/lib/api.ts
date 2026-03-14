@@ -227,7 +227,7 @@ export const payAllCommissions = (secret: string, sellerId: string) =>
 
 export type OnboardRequest = {
   id: string; name: string; ownerName: string; ownerPhone: string;
-  locale: string; country: string; createdAt: string;
+  businessPhone: string; locale: string; country: string; createdAt: string;
 };
 
 export const getOnboardRequests = (secret: string) =>

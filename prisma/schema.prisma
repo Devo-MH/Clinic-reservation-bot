@@ -244,14 +244,15 @@ model Payment {
 // ─── Onboard Requests ─────────────────────────────────────────────────────────
 
 model OnboardRequest {
-  id         String               @id @default(cuid())
-  name       String
-  ownerName  String
-  ownerPhone String
-  locale     Locale               @default(AR)
-  country    Country              @default(GULF)
-  status     OnboardRequestStatus @default(PENDING)
-  createdAt  DateTime             @default(now())
+  id             String               @id @default(cuid())
+  name           String
+  ownerName      String
+  ownerPhone     String
+  businessPhone  String
+  locale         Locale               @default(AR)
+  country        Country              @default(GULF)
+  status         OnboardRequestStatus @default(PENDING)
+  createdAt      DateTime             @default(now())
 
   @@map("onboard_requests")
 }

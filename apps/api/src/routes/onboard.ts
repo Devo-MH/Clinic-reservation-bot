@@ -44,20 +44,21 @@ export async function onboardRoutes(app: FastifyInstance) {
   app.post("/onboard/request", {
     config: { rateLimit: { max: 5, timeWindow: "10 minutes" } },
   }, async (req, reply) => {
-    const { name, ownerName, ownerPhone, locale, country } = req.body as {
+    const { name, ownerName, ownerPhone, businessPhone, locale, country } = req.body as {
       name: string;
       ownerName: string;
       ownerPhone: string;
+      businessPhone: string;
       locale: "AR" | "EN";
       country: "GULF" | "EGYPT";
     };
 
-    if (!name?.trim() || !ownerName?.trim() || !ownerPhone?.trim()) {
+    if (!name?.trim() || !ownerName?.trim() || !ownerPhone?.trim() || !businessPhone?.trim()) {
       return reply.status(400).send({ error: "يرجى ملء جميع الحقول" });
     }
 
     await prisma.onboardRequest.create({
-      data: { name, ownerName, ownerPhone, locale: locale ?? "AR", country: country ?? "GULF" },
+      data: { name, ownerName, ownerPhone, businessPhone, locale: locale ?? "AR", country: country ?? "GULF" },
     });
 
     return { ok: true };
