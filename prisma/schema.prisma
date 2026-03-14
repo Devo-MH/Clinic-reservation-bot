@@ -241,6 +241,21 @@ model Payment {
   @@map("payments")
 }
 
+// ─── Onboard Requests ─────────────────────────────────────────────────────────
+
+model OnboardRequest {
+  id         String               @id @default(cuid())
+  name       String
+  ownerName  String
+  ownerPhone String
+  locale     Locale               @default(AR)
+  country    Country              @default(GULF)
+  status     OnboardRequestStatus @default(PENDING)
+  createdAt  DateTime             @default(now())
+
+  @@map("onboard_requests")
+}
+
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
 enum Locale {
@@ -275,6 +290,11 @@ enum AppointmentStatus {
   CANCELLED
   NO_SHOW
   COMPLETED
+}
+
+enum OnboardRequestStatus {
+  PENDING
+  DONE
 }
 
 enum ConversationState {

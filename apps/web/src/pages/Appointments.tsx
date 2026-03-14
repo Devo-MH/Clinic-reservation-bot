@@ -330,8 +330,8 @@ export default function AppointmentsPage() {
                         <p className="font-semibold text-sm text-foreground truncate">
                           {appt.patient.nameAr ?? appt.patient.nameEn ?? appt.patient.phone}
                         </p>
-                        <p className="text-xs text-muted-foreground mt-0.5">{appt.patient.phone}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
+                        <p className="text-sm text-muted-foreground mt-0.5">{appt.patient.phone}</p>
+                        <p className="text-sm text-muted-foreground mt-0.5">
                           {appt.doctor.nameAr}
                           {appt.service && <span> · {appt.service.nameAr}</span>}
                         </p>
@@ -416,20 +416,20 @@ export default function AppointmentsPage() {
                           </div>
                           <div>
                             <p className="font-medium">{appt.patient.nameAr ?? appt.patient.nameEn ?? "—"}</p>
-                            <p className="text-xs text-muted-foreground">{appt.patient.phone}</p>
+                            <p className="text-sm text-muted-foreground">{appt.patient.phone}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-5 py-4">
                         <p className="font-medium">{appt.doctor.nameAr}</p>
-                        {appt.doctor.specialty && <p className="text-xs text-muted-foreground">{appt.doctor.specialty}</p>}
+                        {appt.doctor.specialty && <p className="text-sm text-muted-foreground">{appt.doctor.specialty}</p>}
                       </td>
                       <td className="px-5 py-4 text-muted-foreground">
                         {appt.service?.nameAr ?? <span className="opacity-40">—</span>}
                       </td>
                       <td className="px-5 py-4">
                         <p className="font-medium">{format(dt, "dd MMM yyyy", { locale: ar })}</p>
-                        <p className="text-xs text-muted-foreground">{format(dt, "HH:mm")}</p>
+                        <p className="text-sm text-muted-foreground">{format(dt, "HH:mm")}</p>
                       </td>
                       <td className="px-5 py-4"><Badge variant={badge.variant}>{badge.label}</Badge></td>
                       <td className="px-5 py-4">

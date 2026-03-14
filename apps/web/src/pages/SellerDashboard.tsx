@@ -62,7 +62,7 @@ export default function SellerDashboard() {
             </div>
             <div>
               <h1 className="font-bold text-base leading-none">{sellerName}</h1>
-              <p className="text-xs text-teal-200 mt-0.5">
+              <p className="text-sm text-teal-200 mt-0.5">
                 {Math.round((data?.seller.commissionRate ?? 0.25) * 100)}% commission · Affiliate Dashboard
               </p>
             </div>
@@ -98,7 +98,7 @@ export default function SellerDashboard() {
                   <Icon className={`w-5 h-5 ${color}`} />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">{label}</p>
+                  <p className="text-sm text-gray-500">{label}</p>
                   {isLoading ? <Skeleton className="h-7 w-16 mt-0.5" /> : (
                     <p className="text-3xl font-bold tracking-tight">{value ?? 0}</p>
                   )}
@@ -112,7 +112,7 @@ export default function SellerDashboard() {
         {(chartData.length > 0 || isLoading) && (
           <Card className="border-0 shadow-sm">
             <CardHeader className="px-5 pt-4 pb-2">
-              <CardTitle className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+              <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                 <TrendingUp className="w-4 h-4" /> Monthly Earnings
               </CardTitle>
             </CardHeader>
@@ -140,7 +140,7 @@ export default function SellerDashboard() {
         {/* My Clinics */}
         <Card className="border-0 shadow-sm overflow-hidden">
           <CardHeader className="px-5 pt-4 pb-0">
-            <CardTitle className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+            <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
               <Building2 className="w-4 h-4" /> My Clinics
             </CardTitle>
           </CardHeader>
@@ -160,12 +160,12 @@ export default function SellerDashboard() {
                   <div key={t.id} className={`flex items-center gap-3 px-5 py-3 border-l-2 ${t.isActive ? "border-l-teal-500" : "border-l-gray-200"}`}>
                     <div className="flex-1">
                       <p className="text-sm font-medium">{t.name}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-sm text-gray-500">
                         {t.clinicCode} · {t.country} · joined {format(new Date(t.createdAt), "MMM yyyy")}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">{t._count.appointments} appts</span>
+                      <span className="text-sm text-gray-500">{t._count.appointments} appts</span>
                       <Badge variant={t.isActive ? "success" : "secondary"} className="text-xs">
                         {t.isActive ? "Active" : "Inactive"}
                       </Badge>
@@ -180,7 +180,7 @@ export default function SellerDashboard() {
         {/* Commission History */}
         <Card className="border-0 shadow-sm overflow-hidden">
           <CardHeader className="px-5 pt-4 pb-0">
-            <CardTitle className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+            <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
               <DollarSign className="w-4 h-4" /> Commission History
             </CardTitle>
           </CardHeader>
@@ -199,26 +199,26 @@ export default function SellerDashboard() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b bg-muted/30">
-                      <th className="text-left px-5 py-2.5 font-medium text-muted-foreground">Clinic</th>
-                      <th className="text-left px-3 py-2.5 font-medium text-muted-foreground">Bundle</th>
-                      <th className="text-right px-3 py-2.5 font-medium text-muted-foreground">Sale</th>
-                      <th className="text-right px-3 py-2.5 font-medium text-muted-foreground">Your Cut</th>
-                      <th className="text-left px-3 py-2.5 font-medium text-muted-foreground">Date</th>
-                      <th className="text-left px-3 py-2.5 font-medium text-muted-foreground">Status</th>
+                      <th className="text-left px-5 py-2.5 font-semibold text-gray-600">Clinic</th>
+                      <th className="text-left px-3 py-2.5 font-semibold text-gray-600">Bundle</th>
+                      <th className="text-right px-3 py-2.5 font-semibold text-gray-600">Sale</th>
+                      <th className="text-right px-3 py-2.5 font-semibold text-gray-600">Your Cut</th>
+                      <th className="text-left px-3 py-2.5 font-semibold text-gray-600">Date</th>
+                      <th className="text-left px-3 py-2.5 font-semibold text-gray-600">Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/50">
                     {data.commissions.map((c) => (
                       <tr key={c.id} className="hover:bg-muted/20">
                         <td className="px-5 py-3 font-medium">{c.tenantName}</td>
-                        <td className="px-3 py-3 text-muted-foreground">{BUNDLE_LABEL[c.bundle] ?? c.bundle}</td>
+                        <td className="px-3 py-3 text-gray-600">{BUNDLE_LABEL[c.bundle] ?? c.bundle}</td>
                         <td className="px-3 py-3 text-right text-muted-foreground">
                           {c.paymentAmount} {c.currency}
                         </td>
                         <td className="px-3 py-3 text-right font-semibold text-teal-700">
                           {c.commissionAmount.toFixed(2)} {c.currency}
                         </td>
-                        <td className="px-3 py-3 text-muted-foreground text-xs">
+                        <td className="px-3 py-3 text-gray-600 text-sm">
                           {format(new Date(c.createdAt), "dd/MM/yyyy")}
                         </td>
                         <td className="px-3 py-3">

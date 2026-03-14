@@ -128,7 +128,7 @@ export default function DashboardPage() {
             <CardContent className="p-4 md:p-5">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-muted-foreground text-xs font-medium">{label}</p>
+                  <p className="text-gray-600 text-sm font-semibold">{label}</p>
                   {analyticsLoading ? (
                     <Skeleton className="h-8 w-12 mt-2" />
                   ) : (
@@ -197,7 +197,7 @@ export default function DashboardPage() {
             ) : (
               <>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">المواعيد هذا الشهر</span>
+                  <span className="text-gray-600">المواعيد هذا الشهر</span>
                   <span className="font-semibold">
                     {analytics?.thisMonth}
                     {analytics?.limit ? ` / ${analytics.limit}` : " (∞)"}
@@ -211,7 +211,7 @@ export default function DashboardPage() {
                         style={{ width: `${usagePct}%` }}
                       />
                     </div>
-                    <p className={`text-xs ${usagePct >= 90 ? "text-red-500" : usagePct >= 70 ? "text-amber-500" : "text-muted-foreground"}`}>
+                    <p className={`text-sm ${usagePct >= 90 ? "text-red-500" : usagePct >= 70 ? "text-amber-500" : "text-muted-foreground"}`}>
                       {usagePct}% من الحصة المتاحة
                       {usagePct >= 80 && " — يُنصح بالترقية"}
                     </p>
@@ -225,7 +225,7 @@ export default function DashboardPage() {
                     { label: "لم يحضروا", value: analytics?.noShows },
                   ].map(({ label, value }) => (
                     <div key={label} className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">{label}</span>
+                      <span className="text-gray-600">{label}</span>
                       <span className="font-medium">{value}</span>
                     </div>
                   ))}
@@ -279,7 +279,7 @@ export default function DashboardPage() {
                     {/* Time pill */}
                     <div className="flex-shrink-0 w-14 h-11 rounded-xl bg-teal-50 flex flex-col items-center justify-center border border-teal-100">
                       <Clock className="w-3 h-3 text-teal-600 mb-0.5" />
-                      <span className="text-xs font-bold text-teal-700">{time}</span>
+                      <span className="text-sm font-bold text-teal-700">{time}</span>
                     </div>
 
                     {/* Info */}
@@ -288,7 +288,7 @@ export default function DashboardPage() {
                         <User className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
                         <p className="text-sm font-medium truncate">{patientName}</p>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-0.5">
+                      <p className="text-sm text-gray-600 mt-0.5">
                         د. {appt.doctor.nameAr}
                         {appt.service && ` • ${appt.service.nameAr}`}
                       </p>

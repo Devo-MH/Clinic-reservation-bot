@@ -39,6 +39,11 @@ const envSchema = z.object({
   // Super-admin secret for the admin panel
   ADMIN_SECRET: z.string().default("change-me-admin-secret"),
 
+  // Meta Embedded Signup (for clinic self-onboarding)
+  META_APP_ID:     z.string().default(""),
+  META_APP_SECRET: z.string().default(""),
+  META_CONFIG_ID:  z.string().default(""),
+
   // Optional
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
 });

@@ -7,7 +7,8 @@ import {
   getAdminStats, getAdminTenants, createAdminTenant,
   updateAdminTenant, deleteAdminTenant,
   getAdminSellers, createAdminSeller, updateAdminSeller, payAllCommissions,
-  type AdminTenant, type AdminSeller,
+  getOnboardRequests, markOnboardRequestDone,
+  type AdminTenant, type AdminSeller, type OnboardRequest,
 } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -275,7 +276,7 @@ function CreateSellerDialog({ onCreated }: { onCreated: () => void }) {
             <Label>Password *</Label>
             <Input type="password" placeholder="••••••••" value={form.password} onChange={(e) => set("password", e.target.value)} required />
           </div>
-          <p className="text-xs text-muted-foreground">Commission rate: 25% on every bundle purchase (recurring)</p>
+          <p className="text-sm text-gray-500">Commission rate: 25% on every bundle purchase (recurring)</p>
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Creating..." : "Create Seller"}
           </Button>
@@ -317,7 +318,7 @@ function SellersTab() {
   return (
     <Card className="border-0 shadow-sm overflow-hidden">
       <CardHeader className="px-5 pt-4 pb-0 flex flex-row items-center justify-between">
-        <CardTitle className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+        <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
           <Users className="w-4 h-4" />
           Sellers ({sellers?.length ?? 0})
         </CardTitle>
@@ -338,12 +339,12 @@ function SellersTab() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-muted/30">
-                  <th className="text-left px-5 py-2.5 font-medium text-muted-foreground">Seller</th>
-                  <th className="text-left px-3 py-2.5 font-medium text-muted-foreground">Code</th>
-                  <th className="text-right px-3 py-2.5 font-medium text-muted-foreground">Clinics</th>
-                  <th className="text-right px-3 py-2.5 font-medium text-muted-foreground">Total Earned</th>
-                  <th className="text-right px-3 py-2.5 font-medium text-muted-foreground">Pending</th>
-                  <th className="text-left px-3 py-2.5 font-medium text-muted-foreground">Status</th>
+                  <th className="text-left px-5 py-2.5 font-semibold text-gray-600">Seller</th>
+                  <th className="text-left px-3 py-2.5 font-semibold text-gray-600">Code</th>
+                  <th className="text-right px-3 py-2.5 font-semibold text-gray-600">Clinics</th>
+                  <th className="text-right px-3 py-2.5 font-semibold text-gray-600">Total Earned</th>
+                  <th className="text-right px-3 py-2.5 font-semibold text-gray-600">Pending</th>
+                  <th className="text-left px-3 py-2.5 font-semibold text-gray-600">Status</th>
                   <th className="px-3 py-2.5" />
                 </tr>
               </thead>
@@ -352,7 +353,7 @@ function SellersTab() {
                   <tr key={s.id} className="hover:bg-muted/20 transition-colors">
                     <td className="px-5 py-3">
                       <p className="font-medium">{s.name}</p>
-                      <p className="text-xs text-muted-foreground">{s.phone}</p>
+                      <p className="text-sm text-gray-500">{s.phone}</p>
                     </td>
                     <td className="px-3 py-3">
                       <div className="flex items-center gap-1">
@@ -413,7 +414,7 @@ export default function AdminPanel() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const secret = getSecret();
-  const [tab, setTab] = useState<"clinics" | "sellers">("clinics");
+  const [tab, setTab] = useState<"requests" | "clinics" | "sellers">("requests");
   const [clinicSearch, setClinicSearch] = useState("");
 
   const { data: stats, isLoading: statsLoading } = useQuery({
@@ -429,6 +430,17 @@ export default function AdminPanel() {
   const { data: sellers = [] } = useQuery({
     queryKey: ["admin-sellers"],
     queryFn: () => getAdminSellers(secret),
+  });
+
+  const { data: onboardRequests = [], refetch: refetchRequests } = useQuery({
+    queryKey: ["onboard-requests"],
+    queryFn: () => getOnboardRequests(secret),
+    refetchInterval: 30000,
+  });
+
+  const markDone = useMutation({
+    mutationFn: (id: string) => markOnboardRequestDone(secret, id),
+    onSuccess: () => { refetchRequests(); toast.success("Marked as done"); },
   });
 
   const toggleActive = useMutation({
@@ -491,7 +503,7 @@ export default function AdminPanel() {
                   <Icon className={`w-5 h-5 ${color}`} />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">{label}</p>
+                  <p className="text-sm font-medium text-gray-600">{label}</p>
                   {statsLoading ? <Skeleton className="h-7 w-12 mt-0.5" /> : (
                     <p className="text-3xl font-bold tracking-tight">{value ?? 0}</p>
                   )}
@@ -503,6 +515,19 @@ export default function AdminPanel() {
 
         {/* Tabs */}
         <div className="flex gap-2 border-b">
+          <button
+            onClick={() => setTab("requests")}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              tab === "requests" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              📥 New Requests
+              {onboardRequests.length > 0 && (
+                <span className="bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">{onboardRequests.length}</span>
+              )}
+            </span>
+          </button>
           <button
             onClick={() => setTab("clinics")}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
@@ -521,11 +546,62 @@ export default function AdminPanel() {
           </button>
         </div>
 
+        {/* Requests Tab */}
+        {tab === "requests" && (
+          <Card className="border-0 shadow-sm overflow-hidden">
+            <CardHeader className="px-5 pt-4 pb-3">
+              <CardTitle className="text-sm font-semibold text-gray-700">
+                📥 Pending Onboard Requests ({onboardRequests.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {onboardRequests.length === 0 ? (
+                <div className="text-center text-muted-foreground py-10 text-sm">No pending requests</div>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
+                    <tr>
+                      {["Clinic", "Owner", "WhatsApp", "Lang", "Country", "Date", "Action"].map(h => (
+                        <th key={h} className="px-4 py-2 text-left font-medium">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {onboardRequests.map((r: OnboardRequest) => (
+                      <tr key={r.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 font-medium">{r.name}</td>
+                        <td className="px-4 py-3 text-gray-600">{r.ownerName}</td>
+                        <td className="px-4 py-3">
+                          <button
+                            onClick={() => { navigator.clipboard.writeText(r.ownerPhone); toast.success("Copied!"); }}
+                            className="flex items-center gap-1 font-mono text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded transition-colors"
+                          >
+                            {r.ownerPhone} <Copy className="w-3 h-3" />
+                          </button>
+                        </td>
+                        <td className="px-4 py-3"><Badge variant="outline">{r.locale}</Badge></td>
+                        <td className="px-4 py-3"><Badge variant="outline">{r.country}</Badge></td>
+                        <td className="px-4 py-3 text-gray-400 text-xs">{format(new Date(r.createdAt), "MMM d, HH:mm")}</td>
+                        <td className="px-4 py-3">
+                          <Button size="sm" variant="outline" className="text-xs h-7 text-green-600 border-green-200 hover:bg-green-50"
+                            onClick={() => markDone.mutate(r.id)}>
+                            ✓ Done
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Clinics Tab */}
         {tab === "clinics" && (
           <Card className="border-0 shadow-sm overflow-hidden">
             <CardHeader className="px-5 pt-4 pb-3 flex flex-row items-center justify-between">
-              <CardTitle className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+              <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                 <Building2 className="w-4 h-4" />
                 Clinics ({tenants?.length ?? 0})
               </CardTitle>
@@ -557,15 +633,15 @@ export default function AdminPanel() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b bg-muted/30">
-                        <th className="text-left px-5 py-2.5 font-medium text-muted-foreground">Clinic</th>
-                        <th className="text-left px-3 py-2.5 font-medium text-muted-foreground">Code</th>
-                        <th className="text-left px-3 py-2.5 font-medium text-muted-foreground">Country</th>
-                        <th className="text-right px-3 py-2.5 font-medium text-muted-foreground">Credits</th>
-                        <th className="text-right px-3 py-2.5 font-medium text-muted-foreground">Appts</th>
-                        <th className="text-right px-3 py-2.5 font-medium text-muted-foreground">Patients</th>
-                        <th className="text-left px-3 py-2.5 font-medium text-muted-foreground">Seller</th>
-                        <th className="text-left px-3 py-2.5 font-medium text-muted-foreground">Created</th>
-                        <th className="text-left px-3 py-2.5 font-medium text-muted-foreground">Status</th>
+                        <th className="text-left px-5 py-2.5 font-semibold text-gray-600">Clinic</th>
+                        <th className="text-left px-3 py-2.5 font-semibold text-gray-600">Code</th>
+                        <th className="text-left px-3 py-2.5 font-semibold text-gray-600">Country</th>
+                        <th className="text-right px-3 py-2.5 font-semibold text-gray-600">Credits</th>
+                        <th className="text-right px-3 py-2.5 font-semibold text-gray-600">Appts</th>
+                        <th className="text-right px-3 py-2.5 font-semibold text-gray-600">Patients</th>
+                        <th className="text-left px-3 py-2.5 font-semibold text-gray-600">Seller</th>
+                        <th className="text-left px-3 py-2.5 font-semibold text-gray-600">Created</th>
+                        <th className="text-left px-3 py-2.5 font-semibold text-gray-600">Status</th>
                         <th className="px-3 py-2.5" />
                       </tr>
                     </thead>
@@ -578,7 +654,7 @@ export default function AdminPanel() {
                             <tr key={t.id} className={`hover:bg-muted/20 transition-colors border-l-2 ${t.isActive ? "border-l-teal-500" : "border-l-gray-200"}`}>
                               <td className="px-5 py-3">
                                 <p className="font-medium">{t.name}</p>
-                                {t.ownerPhone && <p className="text-xs text-muted-foreground">{t.ownerPhone}</p>}
+                                {t.ownerPhone && <p className="text-sm text-gray-500">{t.ownerPhone}</p>}
                               </td>
                               <td className="px-3 py-3">
                                 <div className="flex items-center gap-1">
@@ -590,7 +666,7 @@ export default function AdminPanel() {
                                   )}
                                 </div>
                               </td>
-                              <td className="px-3 py-3 text-muted-foreground">{t.country}</td>
+                              <td className="px-3 py-3 text-gray-600">{t.country}</td>
                               <td className="px-3 py-3 text-right">
                                 <div className="flex items-center justify-end gap-1">
                                   <span className="font-semibold">{t.credits}</span>
@@ -599,8 +675,8 @@ export default function AdminPanel() {
                               </td>
                               <td className="px-3 py-3 text-right text-muted-foreground">{t._count.appointments}</td>
                               <td className="px-3 py-3 text-right text-muted-foreground">{t._count.patients}</td>
-                              <td className="px-3 py-3 text-xs text-muted-foreground">{sellerName}</td>
-                              <td className="px-3 py-3 text-muted-foreground text-xs">
+                              <td className="px-3 py-3 text-sm text-gray-500">{sellerName}</td>
+                              <td className="px-3 py-3 text-gray-600 text-xs">
                                 {format(new Date(t.createdAt), "dd/MM/yy")}
                               </td>
                               <td className="px-3 py-3">

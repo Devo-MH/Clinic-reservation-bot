@@ -225,6 +225,21 @@ export const updateAdminSeller = (secret: string, id: string, data: {
 export const payAllCommissions = (secret: string, sellerId: string) =>
   adminApi(secret).patch(`/sellers/${sellerId}/pay-all`, {}).then((r) => r.data);
 
+export type OnboardRequest = {
+  id: string; name: string; ownerName: string; ownerPhone: string;
+  locale: string; country: string; createdAt: string;
+};
+
+export const getOnboardRequests = (secret: string) =>
+  axios.get<OnboardRequest[]>("/admin/onboard-requests", {
+    headers: { "x-admin-secret": secret },
+  }).then((r) => r.data);
+
+export const markOnboardRequestDone = (secret: string, id: string) =>
+  axios.patch(`/admin/onboard-requests/${id}/done`, {}, {
+    headers: { "x-admin-secret": secret },
+  }).then((r) => r.data);
+
 // ── Seller (affiliate) ────────────────────────────────────────────────────────
 
 export type SellerDashboardData = {

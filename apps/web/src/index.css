@@ -40,6 +40,10 @@
     --font-arabic: "Tajawal", system-ui, sans-serif;
   }
 
+  html {
+    font-size: 17px;
+  }
+
   * {
     @apply border-border;
   }

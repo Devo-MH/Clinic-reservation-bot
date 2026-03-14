@@ -13,6 +13,7 @@ import { authRoutes } from "./routes/auth.js";
 import { billingRoutes } from "./routes/billing.js";
 import { adminRoutes } from "./routes/admin.js";
 import { sellerRoutes } from "./routes/seller.js";
+import { onboardRoutes } from "./routes/onboard.js";
 import "./jobs/worker.js";
 import { startScheduler } from "./jobs/scheduler.js";
 
@@ -36,6 +37,7 @@ await app.register(authRoutes);
 await app.register(billingRoutes);
 await app.register(adminRoutes);
 await app.register(sellerRoutes);
+await app.register(onboardRoutes);
 
 // ── Health check ──────────────────────────────────────────────────────────────
 
@@ -64,3 +66,6 @@ try {
 }
 // Wed Mar  4 02:57:11 EET 2026
 // Wed Mar  4 03:05:35 EET 2026
+// Wed Mar  4 21:25:36 EET 2026
+// deploy Wed Mar  4 21:36:02 EET 2026
+// deploy Wed Mar  4 21:52:42 EET 2026

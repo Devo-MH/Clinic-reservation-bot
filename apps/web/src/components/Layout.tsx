@@ -38,7 +38,7 @@ function SidebarContent({ onNav }: { onNav?: () => void }) {
           </div>
           <div className="min-w-0">
             <p className="text-white font-bold text-sm leading-none">ClinicBot</p>
-            <p className="text-white/50 text-xs mt-1 truncate">{clinicName}</p>
+            <p className="text-white/70 text-xs mt-1 truncate">{clinicName}</p>
           </div>
         </div>
       </div>
@@ -55,7 +55,7 @@ function SidebarContent({ onNav }: { onNav?: () => void }) {
                 "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group",
                 isActive
                   ? "bg-white text-teal-800 shadow-sm"
-                  : "text-white/60 hover:text-white hover:bg-white/10"
+                  : "text-white/80 hover:text-white hover:bg-white/10"
               )
             }
           >
@@ -63,7 +63,7 @@ function SidebarContent({ onNav }: { onNav?: () => void }) {
               <>
                 <Icon className={cn(
                   "w-4 h-4 flex-shrink-0 transition-colors",
-                  isActive ? "text-teal-700" : "text-white/50 group-hover:text-white/80"
+                  isActive ? "text-teal-700" : "text-white/70 group-hover:text-white"
                 )} />
                 <span className="flex-1">{label}</span>
                 {isActive && <div className="w-1.5 h-1.5 rounded-full bg-teal-500" />}
@@ -77,7 +77,7 @@ function SidebarContent({ onNav }: { onNav?: () => void }) {
       <div className="p-3 border-t border-white/10">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-white/50 hover:text-white hover:bg-white/8 transition-all duration-150"
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150"
         >
           <LogOut className="w-4 h-4" />
           <span>تسجيل الخروج</span>
