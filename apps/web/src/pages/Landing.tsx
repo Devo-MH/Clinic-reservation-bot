@@ -281,13 +281,27 @@ export default function Landing() {
 
         @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
         .fu { animation: fadeUp .65s ease both; }
+
+        /* ── Mobile ── */
+        @media (max-width: 640px) {
+          .nav-links  { display: none !important; }
+          .hero-btns  { flex-direction: column; align-items: center; }
+          .hero-btns a, .hero-btns button { width: 100%; max-width: 300px; text-align: center; }
+          .stats-row  { gap: 10px !important; }
+          .stat       { min-width: 80px !important; padding: 14px 16px !important; }
+          .demo-row   { flex-direction: column; align-items: center; }
+          .demo-row > div { width: 100%; }
+          .price-row  { flex-direction: column; align-items: center; }
+          .price-c    { min-width: unset !important; width: 100%; max-width: 340px; }
+          .how-inner  { max-width: 100% !important; }
+        }
       `}</style>
 
       {/* ══ NAVBAR ══════════════════════════════════════════ */}
       <nav style={{ position: "sticky", top: 0, zIndex: 50, borderBottom: "1px solid rgba(168,85,247,.12)", backdropFilter: "blur(24px)", background: "rgba(8,6,15,.75)" }}>
         <div style={{ maxWidth: 1140, margin: "0 auto", padding: "0 24px", height: 64, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <span style={{ fontSize: 22, fontWeight: 900 }} className="grad">موعدك</span>
-          <div style={{ display: "flex", gap: 32 }}>
+          <div className="nav-links" style={{ display: "flex", gap: 32 }}>
             <a href="#features" className="nav-a">{c.nav.features}</a>
             <a href="#how"      className="nav-a">{c.nav.how}</a>
             <a href="#demo"     className="nav-a">{c.nav.demo}</a>
@@ -320,13 +334,13 @@ export default function Landing() {
             {c.hero.desc}
           </p>
 
-          <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap", marginBottom: 72 }}>
+          <div className="hero-btns" style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap", marginBottom: 72 }}>
             <Link to="/onboard" className="btn-primary">{c.hero.cta1}</Link>
             <a href="#demo" className="btn-ghost">{c.hero.cta2}</a>
           </div>
 
           {/* stats */}
-          <div style={{ display: "flex", justifyContent: "center", gap: 14, flexWrap: "wrap" }}>
+          <div className="stats-row" style={{ display: "flex", justifyContent: "center", gap: 14, flexWrap: "wrap" }}>
             {c.hero.stats.map((s, i) => (
               <div key={i} className="stat">
                 <div style={{ fontSize: 28, fontWeight: 900 }} className="grad">{s.v}</div>
@@ -386,7 +400,7 @@ export default function Landing() {
             <div className="pill-label">{c.demo.label}</div>
             <h2 style={{ fontSize: "clamp(26px,4vw,38px)", fontWeight: 800, color: "#fff" }}>{c.demo.title}</h2>
           </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 48, justifyContent: "center", alignItems: "flex-start" }}>
+          <div className="demo-row" style={{ display: "flex", flexWrap: "wrap", gap: 48, justifyContent: "center", alignItems: "flex-start" }}>
             <div>
               <p style={{ color: "#c084fc", fontWeight: 600, marginBottom: 16, fontSize: 14 }}>{c.demo.wa}</p>
               <WhatsAppDemo />
@@ -401,7 +415,7 @@ export default function Landing() {
 
       {/* ══ HOW IT WORKS ═══════════════════════════════════ */}
       <section id="how" style={{ padding: "88px 24px", borderTop: "1px solid rgba(168,85,247,.1)", background: "rgba(168,85,247,.03)" }}>
-        <div style={{ maxWidth: 680, margin: "0 auto" }}>
+        <div className="how-inner" style={{ maxWidth: 680, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 56 }}>
             <div className="pill-label">{c.how.label}</div>
             <h2 style={{ fontSize: "clamp(26px,4vw,38px)", fontWeight: 800, color: "#fff" }}>{c.how.title}</h2>
@@ -429,7 +443,7 @@ export default function Landing() {
             <h2 style={{ fontSize: "clamp(26px,4vw,38px)", fontWeight: 800, color: "#fff", marginBottom: 10 }}>{c.pricing.title}</h2>
             <p style={{ color: "rgba(255,255,255,.4)", fontSize: 15 }}>{c.pricing.sub}</p>
           </div>
-          <div style={{ display: "flex", gap: 20, justifyContent: "center", flexWrap: "wrap" }}>
+          <div className="price-row" style={{ display: "flex", gap: 20, justifyContent: "center", flexWrap: "wrap" }}>
             {c.pricing.plans.map((plan, i) => (
               <div key={i} className={`price-c${plan.tag ? " price-popular" : ""}`} style={{ position: "relative" }}>
                 {plan.tag && (

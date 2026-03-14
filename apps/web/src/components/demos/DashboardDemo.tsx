@@ -63,6 +63,7 @@ export default function DashboardDemo() {
       fontFamily: "sans-serif",
       width: "100%",
       maxWidth: 520,
+      minWidth: 0,
     }}>
 
       {/* Title bar */}
@@ -80,7 +81,7 @@ export default function DashboardDemo() {
       <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 12 }}>
 
         {/* ── Stat cards ─────────────────────── */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(100px,1fr))", gap: 8 }}>
           {[
             { label: "مواعيد اليوم", val: appts,    icon: "📅", suf: "" },
             { label: "المرضى",       val: patients,  icon: "👥", suf: "" },

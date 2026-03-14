@@ -1,7 +1,12 @@
 import axios from "axios";
 
+// On Vercel the frontend is a separate domain from the Railway API.
+// Set VITE_API_URL=https://clinic-botapi-production.up.railway.app in Vercel env vars.
+// In local dev / Railway (same origin) this stays empty and the Vite proxy handles it.
+const BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
+
 export const api = axios.create({
-  baseURL: "/api",
+  baseURL: `${BASE}/api`,
   headers: { "Content-Type": "application/json" },
 });
 
@@ -73,7 +78,7 @@ export type WeeklyData = { day: string; date: string; count: number };
 // ── Auth ────────────────────────────────────────────────────────────────────────
 
 export const login = (clinicCode: string, password: string) =>
-  axios.post<{ token: string; tenantId: string; tenantName: string }>("/auth/login", { clinicCode, password }).then((r) => r.data);
+  axios.post<{ token: string; tenantId: string; tenantName: string }>(`${BASE}/auth/login`, { clinicCode, password }).then((r) => r.data);
 
 // ── Appointments ────────────────────────────────────────────────────────────────
 
@@ -155,16 +160,16 @@ export type BillingBalance = {
 };
 
 export const getBillingBalance = (tenantId: string) =>
-  axios.get<BillingBalance>("/billing/balance", { params: { tenantId } }).then((r) => r.data);
+  axios.get<BillingBalance>(`${BASE}/billing/balance`, { params: { tenantId } }).then((r) => r.data);
 
 export const createCheckout = (tenantId: string, bundleId: string, currency: string) =>
-  axios.post<{ paymentId: string; redirectUrl: string }>("/billing/checkout", { tenantId, bundleId, currency }).then((r) => r.data);
+  axios.post<{ paymentId: string; redirectUrl: string }>(`${BASE}/billing/checkout`, { tenantId, bundleId, currency }).then((r) => r.data);
 
 // ── Admin ─────────────────────────────────────────────────────────────────────
 
 function adminApi(secret: string) {
   return axios.create({
-    baseURL: "/admin",
+    baseURL: `${BASE}/admin`,
     headers: { "Content-Type": "application/json", "x-admin-secret": secret },
   });
 }
@@ -231,12 +236,12 @@ export type OnboardRequest = {
 };
 
 export const getOnboardRequests = (secret: string) =>
-  axios.get<OnboardRequest[]>("/admin/onboard-requests", {
+  axios.get<OnboardRequest[]>(`${BASE}/admin/onboard-requests`, {
     headers: { "x-admin-secret": secret },
   }).then((r) => r.data);
 
 export const markOnboardRequestDone = (secret: string, id: string) =>
-  axios.patch(`/admin/onboard-requests/${id}/done`, {}, {
+  axios.patch(`${BASE}/admin/onboard-requests/${id}/done`, {}, {
     headers: { "x-admin-secret": secret },
   }).then((r) => r.data);
 
@@ -254,10 +259,10 @@ export type SellerDashboardData = {
 
 export const sellerLogin = (referralCode: string, password: string) =>
   axios.post<{ token: string; sellerId: string; sellerName: string; referralCode: string }>(
-    "/seller/login", { referralCode, password }
+    `${BASE}/seller/login`, { referralCode, password }
   ).then((r) => r.data);
 
 export const getSellerDashboard = (token: string) =>
-  axios.get<SellerDashboardData>("/seller/dashboard", {
+  axios.get<SellerDashboardData>(`${BASE}/seller/dashboard`, {
     headers: { Authorization: `Bearer ${token}` },
   }).then((r) => r.data);
