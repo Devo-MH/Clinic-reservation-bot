@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import WhatsAppDemo from "@/components/demos/WhatsAppDemo";
+import DashboardDemo from "@/components/demos/DashboardDemo";
 
 const NAV = "#0a1628";
 const NAVY = "#0a1628";
@@ -216,22 +218,20 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Demo Video */}
+      {/* Demo Section */}
       <section id="demo" style={{ background: NAVY2, padding: "80px 24px" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", textAlign: "center" }}>
           <h2 style={{ fontSize: 32, fontWeight: 800, marginBottom: 8, color: "#fff" }}>{c.demo.title}</h2>
-          <p style={{ color: "#94a3b8", marginBottom: 40 }}>{c.demo.sub}</p>
-          {/* Video placeholder 1 */}
-          <div style={{ background: `${NAVY}cc`, border: `2px dashed ${GOLD}44`, borderRadius: 20, padding: "80px 40px", marginBottom: 24, cursor: "pointer" }}>
-            <div style={{ fontSize: 48, marginBottom: 12 }}>🎬</div>
-            <div style={{ color: GOLD, fontSize: 18, fontWeight: 600 }}>{c.demo.placeholder}</div>
-            <div style={{ color: "#64748b", fontSize: 13, marginTop: 8 }}>1920 × 1080 · MP4</div>
-          </div>
-          {/* Video placeholder 2 */}
-          <div style={{ background: `${NAVY}cc`, border: `2px dashed ${GOLD}44`, borderRadius: 20, padding: "80px 40px", cursor: "pointer" }}>
-            <div style={{ fontSize: 48, marginBottom: 12 }}>📱</div>
-            <div style={{ color: GOLD, fontSize: 18, fontWeight: 600 }}>{c.demo.placeholder}</div>
-            <div style={{ color: "#64748b", fontSize: 13, marginTop: 8 }}>WhatsApp Demo · MP4</div>
+          <p style={{ color: "#94a3b8", marginBottom: 56 }}>{c.demo.sub}</p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 48, justifyContent: "center", alignItems: "flex-start" }}>
+            <div>
+              <p style={{ color: GOLD, fontWeight: 700, marginBottom: 20, fontSize: 15 }}>📱 {lang === "ar" ? "تجربة المريض" : "Patient Experience"}</p>
+              <WhatsAppDemo />
+            </div>
+            <div style={{ flex: 1, minWidth: 320 }}>
+              <p style={{ color: GOLD, fontWeight: 700, marginBottom: 20, fontSize: 15 }}>📊 {lang === "ar" ? "لوحة تحكم العيادة" : "Clinic Dashboard"}</p>
+              <DashboardDemo />
+            </div>
           </div>
         </div>
       </section>

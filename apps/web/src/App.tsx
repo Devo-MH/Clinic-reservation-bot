@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import LandingPage from "@/pages/Landing";
+import DemoPage from "@/pages/Demo";
 import LoginPage from "@/pages/Login";
 import DashboardPage from "@/pages/Dashboard";
 import AppointmentsPage from "@/pages/Appointments";
@@ -25,6 +26,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
+      <Route path="/demo" element={<DemoPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/onboard" element={<OnboardPage />} />
 
