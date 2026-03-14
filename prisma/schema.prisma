@@ -249,8 +249,7 @@ model OnboardRequest {
   ownerName      String
   ownerPhone     String
   businessPhone  String
-  locale         Locale               @default(AR)
-  country        Country              @default(GULF)
+  country        String               @default("")
   status         OnboardRequestStatus @default(PENDING)
   createdAt      DateTime             @default(now())
 

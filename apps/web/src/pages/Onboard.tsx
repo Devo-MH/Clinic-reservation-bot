@@ -1,9 +1,21 @@
 import { useState } from "react";
 
+const COUNTRIES = [
+  { value: "SA", label: "🇸🇦 السعودية" },
+  { value: "AE", label: "🇦🇪 الإمارات" },
+  { value: "KW", label: "🇰🇼 الكويت" },
+  { value: "QA", label: "🇶🇦 قطر" },
+  { value: "BH", label: "🇧🇭 البحرين" },
+  { value: "OM", label: "🇴🇲 عُمان" },
+  { value: "EG", label: "🇪🇬 مصر" },
+  { value: "JO", label: "🇯🇴 الأردن" },
+  { value: "LB", label: "🇱🇧 لبنان" },
+];
+
 export default function OnboardPage() {
   const [form, setForm] = useState({
     name: "", ownerName: "", ownerPhone: "", businessPhone: "",
-    country: "GULF" as "GULF" | "EGYPT",
+    country: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState("");
@@ -13,7 +25,7 @@ export default function OnboardPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim() || !form.ownerName.trim() || !form.ownerPhone.trim() || !form.businessPhone.trim()) {
+    if (!form.name.trim() || !form.ownerName.trim() || !form.ownerPhone.trim() || !form.businessPhone.trim() || !form.country) {
       setError("يرجى ملء جميع الحقول");
       return;
     }
@@ -120,14 +132,16 @@ export default function OnboardPage() {
               {/* Country */}
               <div>
                 <label className="block text-sm font-medium text-white/80 mb-1">الدولة</label>
-                <div className="flex rounded-lg overflow-hidden border border-white/20">
-                  {(["GULF", "EGYPT"] as const).map(c => (
-                    <button key={c} type="button" onClick={() => set("country", c)}
-                      className={`flex-1 py-2.5 text-sm font-medium transition-colors ${form.country === c ? "bg-white text-teal-900" : "text-white/70 hover:text-white hover:bg-white/10"}`}>
-                      {c === "GULF" ? "🌍 الخليج" : "🇪🇬 مصر"}
-                    </button>
+                <select
+                  value={form.country} onChange={e => set("country", e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:border-white/60 transition-colors appearance-none"
+                  style={{ backgroundColor: "rgba(255,255,255,0.1)" }}
+                >
+                  <option value="" disabled style={{ background: "#134e4a" }}>اختر الدولة</option>
+                  {COUNTRIES.map(c => (
+                    <option key={c.value} value={c.value} style={{ background: "#134e4a" }}>{c.label}</option>
                   ))}
-                </div>
+                </select>
               </div>
 
               <button type="submit" disabled={loading}
