@@ -25,7 +25,7 @@ const LOOP_DELAY = 22000;
 export default function WhatsAppDemo() {
   const [shown, setShown] = useState<Message[]>([]);
   const [typing, setTyping] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const chatRef = useRef<HTMLDivElement>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   function run() {
@@ -51,7 +51,8 @@ export default function WhatsAppDemo() {
   }, []);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = chatRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
   }, [shown, typing]);
 
   return (
@@ -71,7 +72,7 @@ export default function WhatsAppDemo() {
           </div>
 
           {/* Chat wallpaper */}
-          <div style={{ flex: 1, overflowY: "auto", padding: "12px 10px", background: "#0b141a", scrollbarWidth: "none" }} dir="rtl">
+          <div ref={chatRef} style={{ flex: 1, overflowY: "auto", padding: "12px 10px", background: "#0b141a", scrollbarWidth: "none" }} dir="rtl">
             {/* Date pill */}
             <div style={{ textAlign: "center", marginBottom: 12 }}>
               <span style={{ background: "#182229", color: "#8696a0", fontSize: 11, borderRadius: 8, padding: "3px 10px" }}>اليوم</span>
@@ -108,7 +109,7 @@ export default function WhatsAppDemo() {
                 </div>
               </div>
             )}
-            <div ref={bottomRef} />
+            <div />
           </div>
 
           {/* Input bar */}
