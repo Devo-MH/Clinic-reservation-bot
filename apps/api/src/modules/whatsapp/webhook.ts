@@ -1,6 +1,7 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { env } from "@/config/env.js";
 import { handleIncomingMessage } from "@/modules/bot/engine.js";
+import { checkAndDeductCredit, sendCreditsExhaustedMessage } from "@/modules/credits/credits.js";
 import { prisma } from "@/lib/prisma.js";
 
 // ── Webhook verification (GET) ────────────────────────────────────────────────
@@ -37,6 +38,11 @@ export async function receiveWebhook(req: FastifyRequest, reply: FastifyReply) {
         if (!tenant || !tenant.isActive) continue;
 
         for (const message of value.messages) {
+          const hasCredits = await checkAndDeductCredit(tenant);
+          if (!hasCredits) {
+            await sendCreditsExhaustedMessage(tenant, message.from);
+            continue;
+          }
           await handleIncomingMessage(tenant, message);
         }
       }
