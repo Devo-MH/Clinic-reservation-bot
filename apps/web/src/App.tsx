@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import LandingPage from "@/pages/Landing";
 import LoginPage from "@/pages/Login";
 import DashboardPage from "@/pages/Dashboard";
 import AppointmentsPage from "@/pages/Appointments";
@@ -13,6 +14,7 @@ import AdminLoginPage from "@/pages/AdminLogin";
 import AdminPanelPage from "@/pages/AdminPanel";
 import SellerLoginPage from "@/pages/SellerLogin";
 import SellerDashboardPage from "@/pages/SellerDashboard";
+import OnboardPage from "@/pages/Onboard";
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const secret = sessionStorage.getItem("admin_secret");
@@ -22,7 +24,9 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <Routes>
+      <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/onboard" element={<OnboardPage />} />
 
       {/* Admin routes */}
       <Route path="/admin/login" element={<AdminLoginPage />} />
@@ -43,7 +47,7 @@ export default function App() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route path="/home" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/appointments" element={<AppointmentsPage />} />
         <Route path="/schedule" element={<SchedulePage />} />
