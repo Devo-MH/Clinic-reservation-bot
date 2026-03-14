@@ -25,7 +25,7 @@ function MiniPhone({ flow, lang, label }: { flow: typeof AR_FLOW; lang: "ar"|"en
 
   function run() {
     setShown([]); setTyping(false);
-    flow.forEach(({ delay, from, text }, i) => {
+    flow.forEach(({ delay, from }, i) => {
       if (from === "bot") timers.current.push(setTimeout(() => setTyping(true), delay - 1000));
       timers.current.push(setTimeout(() => {
         setTyping(false);

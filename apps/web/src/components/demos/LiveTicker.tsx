@@ -27,7 +27,6 @@ function randomBetween(a: number, b: number) { return Math.floor(Math.random() *
 export default function LiveTicker() {
   const [items, setItems] = useState<(typeof EVENTS[0] & { id: number; ago: number })[]>([]);
   const [total, setTotal] = useState(0);
-  const counterRef = { total };
 
   useEffect(() => {
     let id = 0;
