@@ -18,7 +18,7 @@ const t = {
     dir: "rtl" as const,
     nav: { features: "المميزات", how: "كيف يعمل", demo: "عرض حي", cta: "ابدأ مجاناً" },
     hero: {
-      badge: "مدعوم بالذكاء الاصطناعي",
+      badge: "١٠٠ رسالة مجانية عند التسجيل 🎁",
       title1: "بوت واتساب ذكي",
       title2: "لعيادتك",
       desc: "أتمتة حجز المواعيد وتذكير المرضى وإدارة العيادة — عبر واتساب مباشرة، بدون تطبيق إضافي.",
@@ -65,15 +65,23 @@ const t = {
     },
     pricing: {
       label: "الأسعار",
-      title: "خطط تناسب حجم عيادتك",
-      sub: "ادفع فقط عند الحاجة — بدون اشتراك شهري",
+      title: "ابدأ مجاناً، ادفع عند الحاجة",
+      sub: "١٠٠ رسالة مجانية عند التسجيل — بدون بطاقة بنكية",
+      free: {
+        tag: "🎁 مجاناً عند التسجيل",
+        name: "تجربة مجانية",
+        credits: "١٠٠",
+        price: "٠",
+        curr: "$",
+        features: ["١٠٠ رسالة مجانية", "بوت واتساب كامل", "لوحة تحكم احترافية", "بدون بطاقة بنكية"],
+      },
       plans: [
         { name: "Starter", credits: "٣٠٠",  price: "٩",  curr: "$", tag: null },
         { name: "Growth",  credits: "٨٠٠",  price: "١٩", curr: "$", tag: "الأكثر شيوعاً" },
         { name: "Pro",     credits: "٢٠٠٠", price: "٣٩", curr: "$", tag: null },
       ],
     },
-    cta: { title: "جاهز تبدأ؟", sub: "انضم إلى العيادات التي وفّرت ساعات من العمل اليدوي", btn: "ابدأ مجاناً الآن" },
+    cta: { title: "جاهز تبدأ؟", sub: "سجّل عيادتك الآن واحصل على ١٠٠ رسالة مجانية فوراً", btn: "ابدأ مجاناً الآن" },
     footer: { tag: "بوت واتساب ذكي للعيادات", rights: "© ٢٠٢٦ موعدك. جميع الحقوق محفوظة." },
     trust: ["🔒 بيانات آمنة", "⚡ بدون كود", "🌍 عربي وإنجليزي"],
   },
@@ -81,7 +89,7 @@ const t = {
     dir: "ltr" as const,
     nav: { features: "Features", how: "How It Works", demo: "Live Demo", cta: "Start Free" },
     hero: {
-      badge: "Powered by AI",
+      badge: "100 free messages on signup 🎁",
       title1: "Smart WhatsApp Bot",
       title2: "For Your Clinic",
       desc: "Automate appointment booking, patient reminders, and clinic management — all through WhatsApp, no extra app needed.",
@@ -128,15 +136,23 @@ const t = {
     },
     pricing: {
       label: "Pricing",
-      title: "Plans for Every Clinic",
-      sub: "Pay only when you need — no monthly subscription",
+      title: "Start Free, Pay When You Need",
+      sub: "100 free messages on signup — no credit card required",
+      free: {
+        tag: "🎁 Free on Signup",
+        name: "Free Trial",
+        credits: "100",
+        price: "0",
+        curr: "$",
+        features: ["100 free messages", "Full WhatsApp bot", "Professional dashboard", "No credit card needed"],
+      },
       plans: [
         { name: "Starter", credits: "300",  price: "9",  curr: "$", tag: null },
         { name: "Growth",  credits: "800",  price: "19", curr: "$", tag: "Most Popular" },
         { name: "Pro",     credits: "2000", price: "39", curr: "$", tag: null },
       ],
     },
-    cta: { title: "Ready to Start?", sub: "Join clinics that saved hours of manual work", btn: "Start for Free Now" },
+    cta: { title: "Ready to Start?", sub: "Register your clinic now and get 100 free messages instantly", btn: "Start for Free Now" },
     footer: { tag: "Smart WhatsApp Bot for Clinics", rights: "© 2026 Maw3idak. All rights reserved." },
     trust: ["🔒 Secure Data", "⚡ No Code", "🌍 Arabic & English"],
   },
@@ -443,7 +459,42 @@ export default function Landing() {
             <h2 style={{ fontSize: "clamp(26px,4vw,38px)", fontWeight: 800, color: "#fff", marginBottom: 10 }}>{c.pricing.title}</h2>
             <p style={{ color: "rgba(255,255,255,.4)", fontSize: 15 }}>{c.pricing.sub}</p>
           </div>
-          <div className="price-row" style={{ display: "flex", gap: 20, justifyContent: "center", flexWrap: "wrap" }}>
+
+          {/* ── Free trial card ── */}
+          <div style={{ maxWidth: 600, margin: "0 auto 40px", background: "linear-gradient(135deg,rgba(168,85,247,.12),rgba(236,72,153,.08))", border: "1px solid rgba(168,85,247,.35)", borderRadius: 24, padding: "32px 36px", position: "relative", boxShadow: "0 0 60px rgba(168,85,247,.12)" }}>
+            <div style={{ position: "absolute", top: -14, left: "50%", transform: "translateX(-50%)", background: "linear-gradient(135deg,#a855f7,#ec4899)", borderRadius: 99, padding: "4px 20px", fontSize: 12, fontWeight: 700, whiteSpace: "nowrap", boxShadow: "0 0 20px rgba(168,85,247,.6)" }}>
+              {c.pricing.free.tag}
+            </div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 24 }}>
+              <div>
+                <div style={{ fontSize: 20, fontWeight: 800, color: "#fff", marginBottom: 6 }}>{c.pricing.free.name}</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 12 }}>
+                  {c.pricing.free.features.map((f, i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "rgba(255,255,255,.7)" }}>
+                      <span style={{ color: "#a855f7", fontSize: 15 }}>✓</span> {f}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div style={{ textAlign: "center", flexShrink: 0 }}>
+                <div style={{ fontSize: 56, fontWeight: 900, lineHeight: 1 }} className="grad">
+                  {c.pricing.free.curr}{c.pricing.free.price}
+                </div>
+                <div style={{ color: "rgba(255,255,255,.4)", fontSize: 13, marginBottom: 20 }}>
+                  {c.pricing.free.credits} {isAr ? "رسالة مجانية" : "free messages"}
+                </div>
+                <Link to="/onboard" className="btn-primary" style={{ display: "inline-block", padding: "12px 32px", fontSize: 15, borderRadius: 12 }}>
+                  {isAr ? "ابدأ مجاناً" : "Start for Free"}
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Paid plans ── */}
+          <div style={{ textAlign: "center", marginBottom: 24 }}>
+            <span style={{ color: "rgba(255,255,255,.3)", fontSize: 13 }}>{isAr ? "أو اختر باقة مدفوعة" : "Or choose a paid bundle"}</span>
+          </div>
+          <div className="price-row" style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
             {c.pricing.plans.map((plan, i) => (
               <div key={i} className={`price-c${plan.tag ? " price-popular" : ""}`} style={{ position: "relative" }}>
                 {plan.tag && (
@@ -451,15 +502,15 @@ export default function Landing() {
                     {plan.tag}
                   </div>
                 )}
-                <div style={{ fontSize: 16, fontWeight: 700, color: "#e2e8f0", marginBottom: 10 }}>{plan.name}</div>
-                <div style={{ marginBottom: 6 }}>
-                  <span style={{ fontSize: 44, fontWeight: 900 }} className="grad">{plan.curr}{plan.price}</span>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "#e2e8f0", marginBottom: 8 }}>{plan.name}</div>
+                <div style={{ marginBottom: 4 }}>
+                  <span style={{ fontSize: 40, fontWeight: 900 }} className="grad">{plan.curr}{plan.price}</span>
                 </div>
-                <div style={{ fontSize: 13, color: "rgba(255,255,255,.4)", marginBottom: 28 }}>
+                <div style={{ fontSize: 12, color: "rgba(255,255,255,.4)", marginBottom: 24 }}>
                   {plan.credits} {isAr ? "رسالة" : "messages"}
                 </div>
-                <Link to="/onboard" className={plan.tag ? "btn-primary" : "btn-ghost"} style={{ display: "block", textAlign: "center", borderRadius: 10, padding: "11px 0", fontSize: 14 }}>
-                  {isAr ? "ابدأ الآن" : "Get Started"}
+                <Link to="/onboard" className={plan.tag ? "btn-primary" : "btn-ghost"} style={{ display: "block", textAlign: "center", borderRadius: 10, padding: "10px 0", fontSize: 13 }}>
+                  {isAr ? "اختر" : "Select"}
                 </Link>
               </div>
             ))}
