@@ -12,9 +12,9 @@ import { CreditCard, Zap, CheckCircle2, Clock, AlertTriangle } from "lucide-reac
 const TENANT_ID = localStorage.getItem("clinic_tenant_id") ?? import.meta.env.VITE_TENANT_ID ?? "";
 
 const BUNDLE_META: Record<string, { label: string; icon: React.ElementType; color: string; bg: string; popular?: boolean }> = {
-  STARTER_50:  { label: "Starter", icon: Zap,          color: "text-blue-600",   bg: "bg-blue-50" },
-  GROWTH_200:  { label: "Growth",  icon: CreditCard,   color: "text-teal-600",   bg: "bg-teal-50", popular: true },
-  PRO_500:     { label: "Pro",     icon: CheckCircle2, color: "text-purple-600", bg: "bg-purple-50" },
+  STARTER: { label: "Starter", icon: Zap,          color: "text-blue-600",   bg: "bg-blue-50" },
+  GROWTH:  { label: "Growth",  icon: CreditCard,   color: "text-teal-600",   bg: "bg-teal-50", popular: true },
+  PRO:     { label: "Pro",     icon: CheckCircle2, color: "text-purple-600", bg: "bg-purple-50" },
 };
 
 const STATUS_META: Record<string, { label: string; variant: "success" | "destructive" | "warning" | "secondary" }> = {
@@ -48,7 +48,7 @@ export default function BillingPage() {
   const creditColor =
     !data ? "" :
     data.credits === 0 ? "text-destructive" :
-    data.credits <= 10 ? "text-amber-600" :
+    data.credits <= 20 ? "text-amber-600" :
     "text-emerald-600";
 
   return (
@@ -80,7 +80,7 @@ export default function BillingPage() {
             </div>
           </div>
 
-          {data && data.credits <= 10 && data.credits > 0 && (
+          {data && data.credits <= 20 && data.credits > 0 && (
             <div className="mt-4 flex items-center gap-2 text-amber-600 bg-amber-50 rounded-lg px-3 py-2 text-sm">
               <AlertTriangle className="w-4 h-4 flex-shrink-0" />
               <span>رصيدك منخفض! قم بالشراء لضمان استمرار الخدمة.</span>
@@ -191,7 +191,7 @@ export default function BillingPage() {
                 return (
                   <div key={p.id} className="flex items-center gap-3 px-4 md:px-5 py-3">
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium">{bundleLabel} — {p.credits} حجز</p>
+                      <p className="text-sm font-medium">{bundleLabel} — {p.credits} رسالة</p>
                       <p className="text-xs text-muted-foreground">
                         {format(new Date(p.createdAt), "dd/MM/yyyy")} · {p.gateway}
                       </p>

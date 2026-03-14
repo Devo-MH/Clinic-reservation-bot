@@ -42,33 +42,33 @@ async function createCommission(paymentId: string) {
 // ── Bundle definitions ─────────────────────────────────────────────────────────
 
 export const BUNDLES = {
-  STARTER_50: {
-    credits: 50,
-    prices: { SAR: 25, AED: 35, KWD: 8, QAR: 90, BHD: 9, EGP: 150 },
+  STARTER: {
+    credits: 300,
+    prices: { USD: 9, EGP: 450 },
+    label: "Starter",
   },
-  GROWTH_200: {
-    credits: 200,
-    prices: { SAR: 80, AED: 110, KWD: 25, QAR: 290, BHD: 30, EGP: 480 },
+  GROWTH: {
+    credits: 800,
+    prices: { USD: 19, EGP: 950 },
+    label: "Growth",
   },
-  PRO_500: {
-    credits: 500,
-    prices: { SAR: 150, AED: 210, KWD: 48, QAR: 550, BHD: 57, EGP: 900 },
+  PRO: {
+    credits: 2000,
+    prices: { USD: 39, EGP: 1950 },
+    label: "Pro",
   },
 } as const;
 
 type BundleId = keyof typeof BUNDLES;
 
-// Gulf currencies → Tap Payments; EGP → Paymob
-const GULF_CURRENCIES = ["SAR", "AED", "KWD", "QAR", "BHD"];
-
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
 function getCurrency(country: string): string {
-  return country === "EGYPT" ? "EGP" : "SAR";
+  return country === "EG" ? "EGP" : "USD";
 }
 
 function getGateway(currency: string): "TAP" | "PAYMOB" {
-  return GULF_CURRENCIES.includes(currency) ? "TAP" : "PAYMOB";
+  return currency === "EGP" ? "PAYMOB" : "TAP";
 }
 
 // ── Routes ─────────────────────────────────────────────────────────────────────
