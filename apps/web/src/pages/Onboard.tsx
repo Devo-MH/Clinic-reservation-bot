@@ -3,7 +3,6 @@ import { useState } from "react";
 export default function OnboardPage() {
   const [form, setForm] = useState({
     name: "", ownerName: "", ownerPhone: "",
-    locale: "AR" as "AR" | "EN",
     country: "GULF" as "GULF" | "EGYPT",
   });
   const [loading, setLoading] = useState(false);
@@ -24,7 +23,7 @@ export default function OnboardPage() {
       const res = await fetch("/onboard/request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, locale: "AR" }),
       });
       const data = await res.json() as { ok?: boolean; error?: string };
       if (!res.ok || !data.ok) {
@@ -101,19 +100,6 @@ export default function OnboardPage() {
                   placeholder="966501234567" dir="ltr"
                   className="w-full px-4 py-2.5 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:border-white/60 transition-colors text-left"
                 />
-              </div>
-
-              {/* Language */}
-              <div>
-                <label className="block text-sm font-medium text-white/80 mb-1">لغة البوت</label>
-                <div className="flex rounded-lg overflow-hidden border border-white/20">
-                  {(["AR", "EN"] as const).map(l => (
-                    <button key={l} type="button" onClick={() => set("locale", l)}
-                      className={`flex-1 py-2.5 text-sm font-medium transition-colors ${form.locale === l ? "bg-white text-teal-900" : "text-white/70 hover:text-white hover:bg-white/10"}`}>
-                      {l === "AR" ? "عربي" : "English"}
-                    </button>
-                  ))}
-                </div>
               </div>
 
               {/* Country */}
