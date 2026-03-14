@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import WhatsAppDemo from "@/components/demos/WhatsAppDemo";
-import DashboardDemo from "@/components/demos/DashboardDemo";
+import WhatsAppDemo    from "@/components/demos/WhatsAppDemo";
+import DashboardDemo   from "@/components/demos/DashboardDemo";
+import CalendarDemo    from "@/components/demos/CalendarDemo";
+import NotificationsDemo from "@/components/demos/NotificationsDemo";
+import AnalyticsDemo   from "@/components/demos/AnalyticsDemo";
 
 /* ─────────────────────────────────────────────────────────────
    COLOR PALETTE  (Lovable-style: near-black + violet/pink)
@@ -53,7 +56,7 @@ const t = {
         { icon: "⚡", t: "تشغيل فوري",              d: "اربط عيادتك بالواتساب في ٣ دقائق بدون أي خبرة تقنية" },
       ],
     },
-    demo: { label: "عرض حي", title: "شاهد موعدك في العمل", wa: "📱 تجربة المريض", dash: "📊 لوحة التحكم" },
+    demo: { label: "عرض حي", title: "شاهد موعدك في العمل", sub: "كل ما يحتاجه موظف الاستقبال في مكان واحد", wa: "📱 تجربة المريض", dash: "📊 لوحة التحكم الرئيسية", cal: "📅 جدول الأسبوع", notif: "🔔 الإشعارات الفورية", analytics: "📈 تحليلات النمو" },
     how: {
       label: "كيف يعمل",
       title: "ثلاث خطوات فقط",
@@ -124,7 +127,7 @@ const t = {
         { icon: "⚡", t: "Instant Setup",             d: "Connect your clinic to WhatsApp in 3 minutes, no tech skills needed" },
       ],
     },
-    demo: { label: "Live Demo", title: "See Maw3idak in Action", wa: "📱 Patient Experience", dash: "📊 Clinic Dashboard" },
+    demo: { label: "Live Demo", title: "See Maw3idak in Action", sub: "Everything your front desk needs in one place", wa: "📱 Patient Experience", dash: "📊 Main Dashboard", cal: "📅 Weekly Calendar", notif: "🔔 Live Notifications", analytics: "📈 Growth Analytics" },
     how: {
       label: "How It Works",
       title: "Three Steps Only",
@@ -411,19 +414,38 @@ export default function Landing() {
 
       {/* ══ DEMO ════════════════════════════════════════════ */}
       <section id="demo" style={{ padding: "88px 24px" }}>
-        <div style={{ maxWidth: 1140, margin: "0 auto" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 56 }}>
             <div className="pill-label">{c.demo.label}</div>
-            <h2 style={{ fontSize: "clamp(26px,4vw,38px)", fontWeight: 800, color: "#fff" }}>{c.demo.title}</h2>
+            <h2 style={{ fontSize: "clamp(26px,4vw,38px)", fontWeight: 800, color: "#fff", marginBottom: 10 }}>{c.demo.title}</h2>
+            <p style={{ color: "rgba(255,255,255,.4)", fontSize: 15 }}>{c.demo.sub}</p>
           </div>
-          <div className="demo-row" style={{ display: "flex", flexWrap: "wrap", gap: 48, justifyContent: "center", alignItems: "flex-start" }}>
-            <div>
-              <p style={{ color: "#c084fc", fontWeight: 600, marginBottom: 16, fontSize: 14 }}>{c.demo.wa}</p>
+
+          {/* Row 1: WhatsApp + Dashboard */}
+          <div className="demo-row" style={{ display: "flex", flexWrap: "wrap", gap: 32, justifyContent: "center", alignItems: "flex-start", marginBottom: 32 }}>
+            <div style={{ flex: "0 0 auto" }}>
+              <p style={{ color: "#c084fc", fontWeight: 600, marginBottom: 14, fontSize: 13 }}>{c.demo.wa}</p>
               <WhatsAppDemo />
             </div>
-            <div style={{ flex: 1, minWidth: 320 }}>
-              <p style={{ color: "#c084fc", fontWeight: 600, marginBottom: 16, fontSize: 14 }}>{c.demo.dash}</p>
+            <div style={{ flex: 1, minWidth: 300 }}>
+              <p style={{ color: "#c084fc", fontWeight: 600, marginBottom: 14, fontSize: 13 }}>{c.demo.dash}</p>
               <DashboardDemo />
+            </div>
+          </div>
+
+          {/* Row 2: Calendar + Notifications + Analytics */}
+          <div className="demo-row" style={{ display: "flex", flexWrap: "wrap", gap: 24, justifyContent: "center", alignItems: "flex-start" }}>
+            <div style={{ flex: 1, minWidth: 280 }}>
+              <p style={{ color: "#c084fc", fontWeight: 600, marginBottom: 14, fontSize: 13 }}>{c.demo.cal}</p>
+              <CalendarDemo />
+            </div>
+            <div style={{ flex: 1, minWidth: 280 }}>
+              <p style={{ color: "#c084fc", fontWeight: 600, marginBottom: 14, fontSize: 13 }}>{c.demo.notif}</p>
+              <NotificationsDemo />
+            </div>
+            <div style={{ flex: 1, minWidth: 280 }}>
+              <p style={{ color: "#c084fc", fontWeight: 600, marginBottom: 14, fontSize: 13 }}>{c.demo.analytics}</p>
+              <AnalyticsDemo />
             </div>
           </div>
         </div>
